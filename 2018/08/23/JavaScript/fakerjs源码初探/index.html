@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="NodeJs,FakerJs," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="我们写项目的时候经常要写单元测试，通常来说，我们的单元测试都是黑盒测试。比如我们写了一个 “统计注册用户数量” 的功能，为这个功能写单元测试的时候一般不需要考虑用户注册功能，这很容易理解。测试这个统计功能的一个难题就是模拟一些注册用户的数据？nodejs 有丰富的第三方模块方便我们做黑盒测试，这里主要介绍如何使用faker.js来生成测试时需要的数据  快速使用安装1npm install fak">
+<meta name="keywords" content="NodeJs,FakerJs">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FakerJs源码解读">
+<meta property="og:url" content="http://yoursite.com/2018/08/23/JavaScript/fakerjs源码初探/index.html">
+<meta property="og:site_name" content="Andy的个人博客">
+<meta property="og:description" content="我们写项目的时候经常要写单元测试，通常来说，我们的单元测试都是黑盒测试。比如我们写了一个 “统计注册用户数量” 的功能，为这个功能写单元测试的时候一般不需要考虑用户注册功能，这很容易理解。测试这个统计功能的一个难题就是模拟一些注册用户的数据？nodejs 有丰富的第三方模块方便我们做黑盒测试，这里主要介绍如何使用faker.js来生成测试时需要的数据  快速使用安装1npm install fak">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/08/23/JavaScript/fakerjs源码初探/faker.png">
+<meta property="og:updated_time" content="2020-04-17T06:01:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FakerJs源码解读">
+<meta name="twitter:description" content="我们写项目的时候经常要写单元测试，通常来说，我们的单元测试都是黑盒测试。比如我们写了一个 “统计注册用户数量” 的功能，为这个功能写单元测试的时候一般不需要考虑用户注册功能，这很容易理解。测试这个统计功能的一个难题就是模拟一些注册用户的数据？nodejs 有丰富的第三方模块方便我们做黑盒测试，这里主要介绍如何使用faker.js来生成测试时需要的数据  快速使用安装1npm install fak">
+<meta name="twitter:image" content="http://yoursite.com/2018/08/23/JavaScript/fakerjs源码初探/faker.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/08/23/JavaScript/fakerjs源码初探/"/>
+
+
+
+
+
+  <title>FakerJs源码解读 | Andy的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andy的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/23/JavaScript/fakerjs源码初探/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andy的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">FakerJs源码解读</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-23T22:08:09+08:00">
+                2018-08-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index">
+                    <span itemprop="name">JavaScript</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/NodeJs/" itemprop="url" rel="index">
+                    <span itemprop="name">NodeJs</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><em>我们写项目的时候经常要写单元测试，通常来说，我们的单元测试都是黑盒测试。比如我们写了一个 “统计注册用户数量” 的功能，为这个功能写单元测试的时候一般不需要考虑用户注册功能，这很容易理解。测试这个统计功能的一个难题就是模拟一些注册用户的数据？nodejs 有丰富的第三方模块方便我们做黑盒测试，这里主要介绍如何使用faker.js来生成测试时需要的数据</em></p>
+<p><img src="/2018/08/23/JavaScript/fakerjs源码初探/faker.png" alt="faker.js"></p>
+<h1 id="快速使用"><a href="#快速使用" class="headerlink" title="快速使用"></a>快速使用</h1><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install faker --save</span><br></pre></td></tr></table></figure>
+<h2 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Faker = <span class="built_in">require</span>(<span class="string">'faker'</span>)</span><br><span class="line"><span class="comment">// 设置语言环境为中文</span></span><br><span class="line">Faker.locale = <span class="string">'zh_CN'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 生成地址信息</span></span><br><span class="line"><span class="keyword">const</span> city = Faker.address.city()</span><br><span class="line"><span class="built_in">console</span>.log(city)   <span class="comment">// 马头市</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 随机获取一个boolean值</span></span><br><span class="line"><span class="keyword">const</span> bool = Faker.random.boolean()</span><br><span class="line"><span class="built_in">console</span>.log(bool)   <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 从给定的集合中随机获取一个元素</span></span><br><span class="line"><span class="keyword">const</span> name = Faker.random.arrayElement([<span class="string">'张三'</span>, <span class="string">'李四'</span>, <span class="string">'王五'</span>])</span><br><span class="line"><span class="built_in">console</span>.log(name)   <span class="comment">// '李四'</span></span><br></pre></td></tr></table></figure>
+<p>从例子就可以知道，<code>faker.js</code> 的使用其实很简单，首先设置一个语言环境(默认英文)，然后就可以使用它生成各种各样的 “假数据” 了。</p>
+<h2 id="本地化"><a href="#本地化" class="headerlink" title="本地化"></a>本地化</h2><p><code>Faker</code> 从 <code>v2.0.0</code> 版本开始就支持多个地方，默认语言环境设置为英语，设置一个新的地区很简单:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">Faker.locale = <span class="string">'zh_CN'</span></span><br><span class="line"><span class="comment">// 下面是当前支持的地区清单</span></span><br><span class="line"><span class="string">'de'</span> <span class="comment">// 德文</span></span><br><span class="line"><span class="string">'de_AT'</span> <span class="comment">// 德文 (奥地利) </span></span><br><span class="line"><span class="string">'de_CH'</span> <span class="comment">// 德文 (瑞士) </span></span><br><span class="line"><span class="string">'en'</span> <span class="comment">// 英文</span></span><br><span class="line"><span class="string">'en_AU'</span> <span class="comment">// 英文 (澳大利亚) </span></span><br><span class="line"><span class="string">'en_BORK'</span></span><br><span class="line"><span class="string">'en_CA'</span> <span class="comment">// 英文 (加拿大) </span></span><br><span class="line"><span class="string">'en_GB'</span> <span class="comment">// 英文 (英国) </span></span><br><span class="line"><span class="string">'en_IE'</span> <span class="comment">// 英文 (爱尔兰) </span></span><br><span class="line"><span class="string">'en_IND'</span></span><br><span class="line"><span class="string">'en_US'</span> <span class="comment">// 英文 (美国)</span></span><br><span class="line"><span class="string">'en_au_ocker'</span></span><br><span class="line"><span class="string">'es'</span> <span class="comment">// 西班牙文 </span></span><br><span class="line"><span class="string">'es_MX'</span></span><br><span class="line"><span class="string">'fa'</span></span><br><span class="line"><span class="string">'fr'</span> <span class="comment">// 法文 </span></span><br><span class="line"><span class="string">'fr_CA'</span></span><br><span class="line"><span class="string">'ge'</span></span><br><span class="line"><span class="string">'id_ID'</span></span><br><span class="line"><span class="string">'it'</span> <span class="comment">// 意大利文 </span></span><br><span class="line"><span class="string">'ja'</span> <span class="comment">// 日文 </span></span><br><span class="line"><span class="string">'ko'</span> <span class="comment">// 朝鲜文</span></span><br><span class="line"><span class="string">'nb_NO'</span></span><br><span class="line"><span class="string">'nep'</span></span><br><span class="line"><span class="string">'nl'</span> <span class="comment">// 荷兰文 </span></span><br><span class="line"><span class="string">'pl'</span> <span class="comment">// 波兰文 </span></span><br><span class="line"><span class="string">'pt_BR'</span> <span class="comment">// 葡萄牙文 (巴西) </span></span><br><span class="line"><span class="string">'ru'</span> <span class="comment">// 俄文</span></span><br><span class="line"><span class="string">'sk'</span> <span class="comment">// 斯洛伐克文 </span></span><br><span class="line"><span class="string">'sv'</span> <span class="comment">// 瑞典文 </span></span><br><span class="line"><span class="string">'tr'</span> <span class="comment">// 土耳其文 </span></span><br><span class="line"><span class="string">'uk'</span> <span class="comment">// 乌克兰文 </span></span><br><span class="line"><span class="string">'vi'</span></span><br><span class="line"><span class="string">'zh_CN'</span> <span class="comment">// 中文 (中国) </span></span><br><span class="line"><span class="string">'zh_TW'</span> <span class="comment">// 中文 (台湾)</span></span><br></pre></td></tr></table></figure>
+<h3 id="个人本地化包"><a href="#个人本地化包" class="headerlink" title="个人本地化包"></a>个人本地化包</h3><p><code>v3.0.0</code> 开始，<code>faker.js</code> 支持增量加载 <code>locale</code>，默认 <code>faker</code> 包括所有地区的数据，在生产环境中，可能想只包含特定一组区域设置的设置数据，写法也很简单，只加载本地语言环境</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Faker = <span class="built_in">require</span>(<span class="string">'faker/locale/zh_CN'</span>)</span><br></pre></td></tr></table></figure>
+<p>下面分类介绍 <code>faker.js</code> 常用的 <code>api</code> 以及这些它们的使用解析</p>
+<h1 id="api-使用解析"><a href="#api-使用解析" class="headerlink" title="api 使用解析"></a>api 使用解析</h1><h2 id="api-清单"><a href="#api-清单" class="headerlink" title="api 清单"></a>api 清单</h2><p>使用 Faker 能够很容易生成以下类型的数据</p>
+<ul>
+<li><strong>helpers</strong><ul>
+<li>randomize(array) : 给定数组的某个随机元素</li>
+<li>slugify(string) : 删除字符串的特殊字符，只保留字符、数字、<code>_</code> 、 <code>-</code> 和 <code>.</code></li>
+<li>replaceSymbolWithNumber(string, symbol) : 用随机数替换 <code>symbol</code> 符号</li>
+<li>replaceSymbols(string) : 将字符串的 <code>#</code> 符号替换为随机数，将 <code>?</code> 符号替换为大写字母</li>
+<li>shuffle(array) : 将 <code>array</code> 打乱顺序返回</li>
+</ul>
+</li>
+<li><strong>address</strong><ul>
+<li>zipCode(format) : 邮政编码</li>
+<li>city() : 城市名称</li>
+<li>cityPrefix() : 城市前缀</li>
+<li>citySuffix() : 城市后缀</li>
+<li>streetName() : 街道名称</li>
+<li>streetAddress(useFullAddress: boolean) : 街道地址</li>
+<li>streetPrefix() : 街道前缀</li>
+<li>streetSuffix() : 街道后缀</li>
+<li>secondaryAddress() : </li>
+<li>county() : 县、郡</li>
+<li>country() : 国家</li>
+<li>countryCode() : 国家代码</li>
+<li>state(useAbbr: boolean) : 省份</li>
+<li>stateAbbr() : 省份，简写</li>
+<li>latitude() : 纬度</li>
+<li>longitude() : 经度</li>
+</ul>
+</li>
+<li><strong>phone</strong><ul>
+<li>phoneNumber(format: string) : 电话号码</li>
+<li>phoneNumberFormat(phoneFormatsArrayIndex: number) : 格式化的电话号码</li>
+<li>phoneFormats() : 电话格式 <code>###-########</code>、<code>###########</code></li>
+</ul>
+</li>
+<li><strong>internet</strong><ul>
+<li>avatar() : 头像URL</li>
+<li>email(firstName: string, lastName: string) : 邮箱</li>
+<li>exampleEmail(firstName: string, lastName: string) : 邮箱</li>
+<li>userName(firstName: string, lastName: string) : 名字</li>
+<li>protocol() : interface协议</li>
+<li>url() : URL</li>
+<li>domainName() : 域名</li>
+<li>domainSuffix() : 域名后缀</li>
+<li>domainWord()</li>
+<li>ip()</li>
+<li>ipv6()</li>
+<li>userAgent() : 用户协议</li>
+<li>color(baseRed255: number, baseGreen255: number, baseBlue255: number)</li>
+<li>mac()</li>
+<li>password(len: number, memorable: boolean, patern: string | RegExp, prefix: string) : 密码</li>
+</ul>
+</li>
+<li><strong>company</strong><ul>
+<li>suffixes()</li>
+<li>companyName(format: number)</li>
+<li>companySuffix()</li>
+<li>catchPhrase()</li>
+<li>bs()</li>
+<li>catchPhraseAdjective()</li>
+<li>catchPhraseDescriptor()</li>
+<li>catchPhraseNoun()</li>
+<li>bsAdjective()</li>
+<li>bsBuzz()</li>
+<li>bsNoun()</li>
+</ul>
+</li>
+<li><strong>image</strong> : 各种图片URL<ul>
+<li>avatar()</li>
+<li>image()</li>
+<li>imageUrl(width: number, height: number, category: string)</li>
+<li>abstract(width: number, height: number)</li>
+<li>animals(width: number, height: number)</li>
+<li>business(width: number, height: number)</li>
+<li>cats(width: number, height: number)</li>
+<li>city(width: number, height: number)</li>
+<li>food(width: number, height: number)</li>
+<li>nightlife(width: number, height: number)</li>
+<li>fashion(width: number, height: number)</li>
+<li>people(width: number, height: number)</li>
+<li>nature(width: number, height: number)</li>
+<li>sports(width: number, height: number)</li>
+<li>technics(width: number, height: number)</li>
+<li>transport(width: number, height: number)</li>
+<li>dataUri(width: number, height: number)</li>
+</ul>
+</li>
+<li><strong>lorem</strong><ul>
+<li>word()</li>
+<li>words(num: number)</li>
+<li>sentence(wordCount: number, range: number)</li>
+<li>slug(wordCount: number)</li>
+<li>sentences(sentenceCount: number)</li>
+<li>paragraph(sentenceCount: number)</li>
+<li>paragraphs(sentenceCount: number, separator: string)</li>
+<li>text(times: number)</li>
+<li>lines(lineCount: number)</li>
+</ul>
+</li>
+<li><strong>date</strong><ul>
+<li>past(years: number, refDate: string | Date)</li>
+<li>future(years: number, refDate: string | Date)</li>
+<li>between(from: string | number | Date, to: string | Date)</li>
+<li>recent(days: number)</li>
+<li>soon(days: number)</li>
+<li>month(options, {abbr: boolean, context: boolean})</li>
+</ul>
+</li>
+<li><strong>random</strong><ul>
+<li>number(max: number) : 0 ~ max向上取整后的随机整数</li>
+<li>number(options: {min: number, max: number, precision: number})</li>
+<li>arrayElement(array) : 随机元素</li>
+<li>objectElement(Object) : 随机 key 对应的 value</li>
+<li>uuid() : uuid编码字符串</li>
+<li>boolean() : 布尔值</li>
+<li>word() : 名词</li>
+<li>words()</li>
+<li>image() : faker.image随机一个方法返回值</li>
+<li>locale() : 语言环境</li>
+</ul>
+</li>
+</ul>
+<p>下面具体介绍常用函数功能以及源码解析</p>
+<h2 id="helpers"><a href="#helpers" class="headerlink" title="helpers"></a>helpers</h2><p>我的理解 <code>helpers</code> 是把一组不明确归类，但是业务使用场景上经常会使用到的一些函数放在一起</p>
+<h3 id="randomize-array"><a href="#randomize-array" class="headerlink" title="randomize(array)"></a>randomize(array)</h3><p>传递数组，返回某个随机元素，底层调用的是 <strong>Faker.random.arrayElement(array)</strong></p>
+<h3 id="slugify-string"><a href="#slugify-string" class="headerlink" title="slugify(string)"></a>slugify(string)</h3><p>删除所有非字母数字字符，从字符串中删除所有特殊字符<strong>具体看例子</strong></p>
+<ul>
+<li>源码</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">self.slugify = <span class="function"><span class="keyword">function</span> (<span class="params">string</span>) </span>&#123;</span><br><span class="line">  string = string || <span class="string">""</span></span><br><span class="line">  <span class="keyword">return</span> string.replace(<span class="regexp">/ /g</span>, <span class="string">'-'</span>).replace(<span class="regexp">/[^\w\.\-]+/g</span>, <span class="string">''</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数接受一个字符串，现将所有空格替换为 “-“，接下来经过正则找出特殊的字符替换为空字符。</p>
+<ul>
+<li>e.g</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Faker.helpers.slugify(<span class="string">'http://andy dd.com?.;]=-@#$%^&amp;*&amp;*'</span>)</span><br><span class="line"><span class="comment">// httpandy-dd.com.-</span></span><br></pre></td></tr></table></figure>
+<h3 id="replaceSymbolWithNumber-string-symbol"><a href="#replaceSymbolWithNumber-string-symbol" class="headerlink" title="replaceSymbolWithNumber(string, symbol)"></a>replaceSymbolWithNumber(string, symbol)</h3><p>用随机数替换 symbol 符号，当未指定 symbol 参数，默认替换 “#” 符号</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> r = Faker.helpers.replaceSymbolWithNumber(<span class="string">'aaa?bbb'</span>, <span class="string">'?'</span>)</span><br><span class="line"><span class="comment">// aaa5bbb</span></span><br></pre></td></tr></table></figure>
+<p>### </p>
+<h3 id="replaceSymbols-string"><a href="#replaceSymbols-string" class="headerlink" title="replaceSymbols(string)"></a>replaceSymbols(string)</h3><p>用符号解析字符串，并适当地替换它们，当字符串出现 “#” 符号将会被替换为 <strong>0到10</strong> 的随机数， 出现 “?” 符号将会被替换为 <strong>A到Z</strong> 的字符</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> r = Faker.helpers.replaceSymbols(<span class="string">'...###...???'</span>)</span><br><span class="line"><span class="comment">// ...137...VWE</span></span><br></pre></td></tr></table></figure>
+<p>### </p>
+<h3 id="shuffle-array"><a href="#shuffle-array" class="headerlink" title="shuffle(array)"></a>shuffle(array)</h3><p>传递一个数组，返回打乱顺序之后的数组</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr = Faker.helpers.shuffle([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>])</span><br><span class="line"><span class="comment">// [ 3, 1, 2, 5, 4 ]</span></span><br></pre></td></tr></table></figure>
+<h2 id="address"><a href="#address" class="headerlink" title="address"></a>address</h2><p>一个地址一般包括 国家、省、市、区、县、街道、邮政编码、经纬度 这些信息，<code>faker</code> 也提供了专门生产这类书籍的函数</p>
+<h3 id="国家"><a href="#国家" class="headerlink" title="国家"></a>国家</h3><h4 id="country"><a href="#country" class="headerlink" title="country()"></a>country()</h4><p>国家，随机从 <strong>faker.definitions.address.country</strong> 选一个值返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> country = Faker.address.country() <span class="comment">// Ghana</span></span><br></pre></td></tr></table></figure>
+<h4 id="countryCode"><a href="#countryCode" class="headerlink" title="countryCode()"></a>countryCode()</h4><p>国家代码，随机从 <strong>faker.definitions.address.country_code</strong> 选一个值返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> country = Faker.address.country() <span class="comment">// NI</span></span><br></pre></td></tr></table></figure>
+<h3 id="省份"><a href="#省份" class="headerlink" title="省份"></a>省份</h3><h4 id="state"><a href="#state" class="headerlink" title="state()"></a>state()</h4><p>省份，随机从 <strong>faker.definitions.address.state</strong> 选一个值返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> state = Faker.address.state() <span class="comment">// 广东省</span></span><br></pre></td></tr></table></figure>
+<h4 id="stateAbbr"><a href="#stateAbbr" class="headerlink" title="stateAbbr()"></a>stateAbbr()</h4><p>省份简写，随机从 <strong>faker.definitions.address.state</strong> 选一个值返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> stateAbbr = Faker.address.stateAbbr() <span class="comment">// 吉</span></span><br></pre></td></tr></table></figure>
+<h3 id="城市"><a href="#城市" class="headerlink" title="城市"></a>城市</h3><h4 id="city"><a href="#city" class="headerlink" title="city()"></a>city()</h4><p>城市名称</p>
+<ul>
+<li>源码</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.city = <span class="function"><span class="keyword">function</span> (<span class="params">format</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> formats = [</span><br><span class="line">    <span class="string">'&#123;&#123;address.cityPrefix&#125;&#125; &#123;&#123;name.firstName&#125;&#125;&#123;&#123;address.citySuffix&#125;&#125;'</span>,</span><br><span class="line">    <span class="string">'&#123;&#123;address.cityPrefix&#125;&#125; &#123;&#123;name.firstName&#125;&#125;'</span>,</span><br><span class="line">    <span class="string">'&#123;&#123;name.firstName&#125;&#125;&#123;&#123;address.citySuffix&#125;&#125;'</span>,</span><br><span class="line">    <span class="string">'&#123;&#123;name.lastName&#125;&#125;&#123;&#123;address.citySuffix&#125;&#125;'</span></span><br><span class="line">  ]</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> format !== <span class="string">"number"</span>) format = faker.random.number(formats.length - <span class="number">1</span>)</span><br><span class="line">  <span class="keyword">return</span> f(formats[format])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数接受一个 0 ~ 3 之间的整数参数，对应 formats 元素索引位置，代表返回结果的格式</p>
+<ul>
+<li>e.g</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> city = Faker.address.city() <span class="comment">// 贵 蔡</span></span><br><span class="line"><span class="keyword">const</span> city = Faker.address.city(<span class="number">0</span>) <span class="comment">// 衡 戴乡县</span></span><br><span class="line"><span class="keyword">const</span> city = Faker.address.city(<span class="number">1</span>) <span class="comment">// 珠 秦</span></span><br><span class="line"><span class="keyword">const</span> city = Faker.address.city(<span class="number">2</span>) <span class="comment">// 孔沙市</span></span><br><span class="line"><span class="keyword">const</span> city = Faker.address.city(<span class="number">3</span>) <span class="comment">// 烨华海市</span></span><br></pre></td></tr></table></figure>
+<h4 id="cityPrefix"><a href="#cityPrefix" class="headerlink" title="cityPrefix()"></a>cityPrefix()</h4><p>城市前缀，随机从 <strong>faker.definitions.address.city_prefix</strong> 选一个值返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> cityPrefix = Faker.address.cityPrefix()</span><br><span class="line"><span class="comment">// 贵</span></span><br></pre></td></tr></table></figure>
+<h4 id="citySuffix-城市后缀"><a href="#citySuffix-城市后缀" class="headerlink" title="citySuffix() - 城市后缀"></a>citySuffix() - 城市后缀</h4><p>随机从 <strong>faker.definitions.address.city_suffix</strong> 选一个值返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> citySuffix = Faker.address.citySuffix()</span><br><span class="line"><span class="comment">// 门市</span></span><br></pre></td></tr></table></figure>
+<h3 id="县、郡"><a href="#县、郡" class="headerlink" title="县、郡"></a>县、郡</h3><h4 id="county"><a href="#county" class="headerlink" title="county()"></a>county()</h4><p>随机返回 <strong>faker.definitions.address.county</strong> 的一个值</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> county = Faker.address.county() <span class="comment">// Borders</span></span><br></pre></td></tr></table></figure>
+<h3 id="街道"><a href="#街道" class="headerlink" title="街道"></a>街道</h3><h4 id="streetName"><a href="#streetName" class="headerlink" title="streetName()"></a>streetName()</h4><p>返回街道名称, 内容包括: <strong>faker.name.lastName() + faker.address.streetSuffix()</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> streetName = Faker.address.streetName()</span><br><span class="line"><span class="comment">// 旭尧 路</span></span><br></pre></td></tr></table></figure>
+<h4 id="streetAddress-useFullAddress"><a href="#streetAddress-useFullAddress" class="headerlink" title="streetAddress(useFullAddress)"></a>streetAddress(useFullAddress)</h4><p>返回一个随机的本地化街道地址</p>
+<ul>
+<li>源码</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.streetAddress = <span class="function"><span class="keyword">function</span> (<span class="params">useFullAddress</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (useFullAddress === <span class="literal">undefined</span>) &#123; useFullAddress = <span class="literal">false</span> &#125;</span><br><span class="line">  <span class="keyword">var</span> address = <span class="string">""</span></span><br><span class="line">  <span class="keyword">switch</span> (faker.random.number(<span class="number">2</span>)) &#123;</span><br><span class="line">  <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">    address = Helpers.replaceSymbolWithNumber(<span class="string">"#####"</span>) + <span class="string">" "</span> + faker.address.streetName()</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">  <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">    address = Helpers.replaceSymbolWithNumber(<span class="string">"####"</span>) +  <span class="string">" "</span> + faker.address.streetName()</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">  <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">    address = Helpers.replaceSymbolWithNumber(<span class="string">"###"</span>) + <span class="string">" "</span> + faker.address.streetName()</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> useFullAddress ? (address + <span class="string">" "</span> + faker.address.secondaryAddress()) : address</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>解析一下以上源码：<strong>faker.random.number(2)</strong> 返回一个 <strong>0~2</strong> 的整数，<strong>address</strong> 包括：<strong>3~5</strong> 随机个数字、<strong>streetName</strong> 街道名称，如果调用函数的时候传递了<strong>useFullAddress</strong> 参数并且为 <strong>true</strong> ，返回的结果后面还加上一个 <strong>secondaryAddress</strong></p>
+<ul>
+<li>e.g</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> address = Faker.address.streetAddress()</span><br><span class="line"><span class="comment">// 84744 胡 街</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> fullAddress = Faker.address.streetAddress(<span class="literal">true</span>)</span><br><span class="line"><span class="comment">// 31940 鹭洋 栋 Suite 456</span></span><br></pre></td></tr></table></figure>
+<h4 id="streetPrefix"><a href="#streetPrefix" class="headerlink" title="streetPrefix()"></a>streetPrefix()</h4><p>街道前缀，该函数随机从 <strong>faker.definitions.address.street_prefix</strong> 返回一个值</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> prefix = Faker.address.streetPrefix() <span class="comment">// b</span></span><br></pre></td></tr></table></figure>
+<h4 id="streetSuffix"><a href="#streetSuffix" class="headerlink" title="streetSuffix()"></a>streetSuffix()</h4><p>街道前缀，该函数随机从 <strong>faker.definitions.address.street_suffix</strong> 返回一个值</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> suffix = Faker.address.streetSuffix() <span class="comment">// 旁</span></span><br></pre></td></tr></table></figure>
+<h3 id="zipCode-format"><a href="#zipCode-format" class="headerlink" title="zipCode(format)"></a>zipCode(format)</h3><p>邮编</p>
+<ul>
+<li>源码</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.zipCode = <span class="function"><span class="keyword">function</span>(<span class="params">format</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> format === <span class="string">'undefined'</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> localeFormat = faker.definitions.address.postcode</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> localeFormat === <span class="string">'string'</span>) &#123;</span><br><span class="line">      format = localeFormat;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      format = faker.random.arrayElement(localeFormat)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> Helpers.replaceSymbols(format)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数最终调用一个 replaceSymbols 方法处理 format</p>
+<ul>
+<li>e.g</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 广州市番禺区邮政区码：511400</span></span><br><span class="line"><span class="built_in">console</span>.log(Faker.address.zipCode())         <span class="comment">// 165761</span></span><br><span class="line"><span class="built_in">console</span>.log(Faker.address.zipCode(<span class="string">'5#####'</span>)) <span class="comment">// 542648</span></span><br><span class="line"><span class="built_in">console</span>.log(Faker.address.zipCode(<span class="string">'51####'</span>)) <span class="comment">// 516216</span></span><br><span class="line"><span class="built_in">console</span>.log(Faker.address.zipCode(<span class="string">'511###'</span>)) <span class="comment">// 511659</span></span><br><span class="line"><span class="built_in">console</span>.log(Faker.address.zipCode(<span class="string">'5114##'</span>)) <span class="comment">// 511427</span></span><br></pre></td></tr></table></figure>
+<h3 id="longitude-、latitude"><a href="#longitude-、latitude" class="headerlink" title="longitude()、latitude()"></a>longitude()、latitude()</h3><p>随机返回一个经纬度值，保留4位小数</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 纬度</span></span><br><span class="line"><span class="keyword">const</span> latitude = Faker.address.latitude()</span><br><span class="line"><span class="built_in">console</span>.log(latitude)     <span class="comment">// 73.4892</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 经度</span></span><br><span class="line"><span class="keyword">const</span> longitude = Faker.address.longitude()</span><br><span class="line"><span class="built_in">console</span>.log(longitude)    <span class="comment">// -108.0344</span></span><br></pre></td></tr></table></figure>
+<h2 id="phone"><a href="#phone" class="headerlink" title="phone"></a>phone</h2><h3 id="phoneNumber-format-string"><a href="#phoneNumber-format-string" class="headerlink" title="phoneNumber(format: string)"></a>phoneNumber(format: string)</h3><p>随机生成一个电话号码或者手机号码，可以指定格式</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Faker.phone.phoneNumber()</span><br><span class="line"><span class="comment">// 3625-32739746</span></span><br><span class="line">Faker.phone.phoneNumber()</span><br><span class="line"><span class="comment">// 31393888310</span></span><br><span class="line">Faker.phone.phoneNumber(<span class="string">'13800######'</span>)</span><br><span class="line"><span class="comment">// 13800604147</span></span><br><span class="line">Faker.phone.phoneNumber(<span class="string">'3625-3273####'</span>)</span><br><span class="line"><span class="comment">// 3625-32732631</span></span><br></pre></td></tr></table></figure>
+<h3 id="phoneNumberFormat-phoneFormatsArrayIndex-number"><a href="#phoneNumberFormat-phoneFormatsArrayIndex-number" class="headerlink" title="phoneNumberFormat(phoneFormatsArrayIndex: number)"></a>phoneNumberFormat(phoneFormatsArrayIndex: number)</h3><p>格式化的电话号码</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Faker.phone.phoneNumberFormat(<span class="number">1</span>)</span><br><span class="line"><span class="comment">// 7396-21037517</span></span><br><span class="line">Faker.phone.phoneNumberFormat(<span class="number">2</span>)</span><br><span class="line"><span class="comment">// 25961884157</span></span><br></pre></td></tr></table></figure>
+<h3 id="phoneFormats-电话格式"><a href="#phoneFormats-电话格式" class="headerlink" title="phoneFormats()电话格式"></a>phoneFormats()电话格式</h3><p><code>###-########</code>、<code>###########</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Faker.phone.phoneFormats()</span><br><span class="line"><span class="comment">// ###-########</span></span><br><span class="line">Faker.phone.phoneFormats()</span><br><span class="line"><span class="comment">// ###########</span></span><br></pre></td></tr></table></figure>
+<h2 id="internet"><a href="#internet" class="headerlink" title="internet"></a>internet</h2><h3 id="avatar"><a href="#avatar" class="headerlink" title="avatar()"></a>avatar()</h3><p>返回一张网络图片，头像</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Faker.image.avatar()</span><br><span class="line"><span class="comment">// https://s3.amazonaws.com/uifaces/faces/twitter/kolage/128.jpg</span></span><br></pre></td></tr></table></figure>
+<h3 id="email-firstName-lastName-provider"><a href="#email-firstName-lastName-provider" class="headerlink" title="email(firstName, lastName, provider)"></a>email(firstName, lastName, provider)</h3><p>返回邮箱地址</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Faker.internet.email()</span><br><span class="line">Faker.internet.email(<span class="string">'andy'</span>)</span><br><span class="line">Faker.internet.email(<span class="string">'andy'</span>, <span class="string">'andy'</span>)</span><br><span class="line">Faker.internet.email(<span class="string">'andy'</span>, <span class="string">'andy'</span>, <span class="string">'andy.com'</span>)</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">_26@gmail.com</span></span><br><span class="line"><span class="comment">andy.@hotmail.com</span></span><br><span class="line"><span class="comment">andy_andy28@yahoo.com</span></span><br><span class="line"><span class="comment">andy_andy85@andy.com</span></span><br><span class="line"><span class="comment">**/</span></span><br></pre></td></tr></table></figure>
+<h3 id="userName-firstName-lastName"><a href="#userName-firstName-lastName" class="headerlink" title="userName(firstName, lastName)"></a>userName(firstName, lastName)</h3><p>名字</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Faker.internet.userName() 			  <span class="comment">// 罗69</span></span><br><span class="line">Faker.internet.userName()             <span class="comment">// 唐.志强</span></span><br><span class="line">Faker.internet.userName(<span class="string">'aaa'</span>)        <span class="comment">// aaa88</span></span><br><span class="line">Faker.internet.userName(<span class="string">'aaa'</span>, <span class="string">'bbb'</span>) <span class="comment">// aaa_bbb32</span></span><br></pre></td></tr></table></figure>
+<h3 id="protocol"><a href="#protocol" class="headerlink" title="protocol()"></a>protocol()</h3><p>随机返回某个Internet协议</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Faker.internet.protocol() <span class="comment">// https</span></span><br><span class="line">Faker.internet.protocol() <span class="comment">// http</span></span><br></pre></td></tr></table></figure>
+<h3 id="url"><a href="#url" class="headerlink" title="url()"></a>url()</h3><p>随机返回一个<strong>faker.internet.protocol() + ‘://‘ + faker.internet.domainName()</strong>组合的结果</p>
+<h3 id="domainName"><a href="#domainName" class="headerlink" title="domainName()"></a>domainName()</h3><p>随机返回一个<strong>faker.internet.domainWord() + “.” + faker.internet.domainSuffix()</strong>组合的结果</p>
+<h3 id="domainSuffix"><a href="#domainSuffix" class="headerlink" title="domainSuffix()"></a>domainSuffix()</h3><p>随机返回 <strong>faker.definitions.internet.domain_suffix</strong> 的某个元素</p>
+<h3 id="domainWord"><a href="#domainWord" class="headerlink" title="domainWord()"></a>domainWord()</h3><p>结果为：<strong>faker.name.firstName().replace(/([\~#&amp;*{}/:&lt;&gt;?|\”‘])/ig, ‘’).toLowerCase()</strong></p>
+<h3 id="userAgent"><a href="#userAgent" class="headerlink" title="userAgent()"></a>userAgent()</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Faker.internet.userAgent()</span><br><span class="line">Faker.internet.userAgent()</span><br><span class="line">Faker.internet.userAgent()</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">Mozilla/5.0 (Windows; U; Windows NT 5.0) AppleWebKit/535.1.0 (KHTML, like Gecko) Chrome/35.0.831.0 Safari/535.1.0</span></span><br><span class="line"><span class="comment">Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.0; Trident/7.1)</span></span><br><span class="line"><span class="comment">Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; Trident/7.0)</span></span><br><span class="line"><span class="comment">**/</span></span><br></pre></td></tr></table></figure>
+<h3 id="color-baseRed255-baseGreen255-baseBlue255"><a href="#color-baseRed255-baseGreen255-baseBlue255" class="headerlink" title="color(baseRed255, baseGreen255, baseBlue255)"></a>color(baseRed255, baseGreen255, baseBlue255)</h3><p>根据传递的rgb值返回一个颜色值</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Faker.internet.color()</span><br><span class="line">Faker.internet.color(<span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>)</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">#457b25</span></span><br><span class="line"><span class="comment">#3b0563</span></span><br><span class="line"><span class="comment">**/</span></span><br></pre></td></tr></table></figure>
+<h2 id="random"><a href="#random" class="headerlink" title="random"></a>random</h2><h3 id="random-number-options"><a href="#random-number-options" class="headerlink" title="random.number(options)"></a>random.number(options)</h3><ul>
+<li>源码</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.number = <span class="function"><span class="keyword">function</span> (<span class="params">options</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> options === <span class="string">"number"</span>) options = &#123; <span class="attr">max</span>: options &#125;;</span><br><span class="line"></span><br><span class="line">  options = options || &#123;&#125;;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> options.min === <span class="string">"undefined"</span>) options.min = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> options.max === <span class="string">"undefined"</span>) options.max = <span class="number">99999</span>;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> options.precision === <span class="string">"undefined"</span>) options.precision = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> max = options.max;</span><br><span class="line">  <span class="keyword">if</span> (max &gt;= <span class="number">0</span>) max += options.precision;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> randomNumber = options.precision * <span class="built_in">Math</span>.floor(</span><br><span class="line">    mersenne.rand(max / options.precision, options.min / options.precision));</span><br><span class="line">  <span class="keyword">return</span> randomNumber;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>直接看参数[ options ]，如果我们希望得到一个 0~n 的随机整数，我们只需要调用函数的时候传递一个整数 n；如果希望得到一个 m~n 的整数，我们需要传递一个Object 类型的参数，该参数包括 “min”、”max”、”precision” 三个值。max 和 min 参数比较好理解，precision表示对应的精度，很明显当精度为 1，表示去 min~max直接的随机整数</p>
+<ul>
+<li>e.g</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> num = Faker.random.number(<span class="number">10</span>)</span><br><span class="line"><span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> num2 = Faker.random.number(&#123;<span class="attr">min</span>: <span class="number">10</span>, <span class="attr">max</span>: <span class="number">15</span>, <span class="attr">precision</span>: <span class="number">0.1</span>&#125;)</span><br><span class="line"><span class="comment">// 10.700000000000001 约等于 10.7</span></span><br></pre></td></tr></table></figure>
+<h3 id="arrayElement-array"><a href="#arrayElement-array" class="headerlink" title="arrayElement(array)"></a>arrayElement(array)</h3><p>接受一个数组，随机返回数组中的某个元素</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> num = Faker.random.arrayElement([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>])</span><br><span class="line"><span class="comment">// 4</span></span><br><span class="line"><span class="keyword">const</span> obj = Faker.random.arrayElement([</span><br><span class="line">  &#123;<span class="attr">name</span>: <span class="string">'张三'</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">name</span>: <span class="string">'李四'</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">name</span>: <span class="string">'王五'</span>&#125;</span><br><span class="line">])</span><br><span class="line"><span class="comment">// &#123;name: '李四'&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="objectElement-object-field"><a href="#objectElement-object-field" class="headerlink" title="objectElement(object, field)"></a>objectElement(object, field)</h3><p>从对象中选择一个随机元素，选择值而不是键。这个函数用于创建各种可能性的自定义列表</p>
+<ul>
+<li>源码</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.objectElement = <span class="function"><span class="keyword">function</span> (<span class="params">object, field</span>) </span>&#123;</span><br><span class="line">  object = object || &#123; <span class="string">"foo"</span>: <span class="string">"bar"</span>, <span class="string">"too"</span>: <span class="string">"car"</span> &#125;;</span><br><span class="line">  <span class="keyword">var</span> array = <span class="built_in">Object</span>.keys(object);</span><br><span class="line">  <span class="keyword">var</span> key = faker.random.arrayElement(array);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> field === <span class="string">"key"</span> ? key : object[key];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>源码很简单，当 field 参数不传或者不等于 “key”，则返回 object 参数某个随机 key 对应的值；而如果 field 等于 “key” 则直接返回随机的某个 key 名</p>
+<ul>
+<li>e.g</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> value = Faker.random.objectElement(&#123;<span class="attr">one</span>: <span class="number">1</span>, <span class="attr">two</span>: <span class="number">2</span>, <span class="attr">three</span>: <span class="number">3</span>&#125;)</span><br><span class="line"><span class="comment">// 3</span></span><br><span class="line"><span class="keyword">const</span> key = Faker.random.objectElement(&#123;<span class="attr">one</span>: <span class="number">1</span>, <span class="attr">two</span>: <span class="number">2</span>, <span class="attr">three</span>: <span class="number">3</span>&#125;, <span class="string">'key'</span>)</span><br><span class="line"><span class="comment">// three</span></span><br></pre></td></tr></table></figure>
+<h3 id="uuid"><a href="#uuid" class="headerlink" title="uuid()"></a>uuid()</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> uuid = Faker.random.uuid()</span><br><span class="line"><span class="comment">// ff1e7143-b134-4040-b815-5cc0d1f02569</span></span><br></pre></td></tr></table></figure>
+<h3 id="boolean"><a href="#boolean" class="headerlink" title="boolean()"></a>boolean()</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> b = Faker.random.boolean()</span><br><span class="line"><span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+<h3 id="image"><a href="#image" class="headerlink" title="image()"></a>image()</h3><p>相当于 Faker.image.image()</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> imageUrl = Faker.random.image()</span><br><span class="line"><span class="comment">// http://lorempixel.com/640/480/abstract</span></span><br></pre></td></tr></table></figure>
+<h3 id="locale"><a href="#locale" class="headerlink" title="locale()"></a>locale()</h3><p>随机返回一个语言环境</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(Faker.random.locale()) <span class="comment">// uk</span></span><br><span class="line"><span class="built_in">console</span>.log(Faker.random.locale()) <span class="comment">// pt_BR</span></span><br><span class="line"><span class="built_in">console</span>.log(Faker.random.locale()) <span class="comment">// de_CH</span></span><br></pre></td></tr></table></figure>
+<h3 id="alphaNumeric"><a href="#alphaNumeric" class="headerlink" title="alphaNumeric()"></a>alphaNumeric()</h3><p>α数字</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(Faker.random.alphaNumeric())  <span class="comment">// p</span></span><br><span class="line"><span class="built_in">console</span>.log(Faker.random.alphaNumeric())  <span class="comment">// z</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>​</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NodeJs/" rel="tag"># NodeJs</a>
+          
+            <a href="/tags/FakerJs/" rel="tag"># FakerJs</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/25/JavaScript/使用Nock模拟Http请求/" rel="next" title="使用Nock模拟Http请求">
+                <i class="fa fa-chevron-left"></i> 使用Nock模拟Http请求
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/25/JavaScript/使用MomentJs处理时间问题/" rel="prev" title="MomentJs使用笔记">
+                MomentJs使用笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Andy" />
+            
+              <p class="site-author-name" itemprop="name">Andy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#快速使用"><span class="nav-number">1.</span> <span class="nav-text">快速使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">1.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单使用"><span class="nav-number">1.2.</span> <span class="nav-text">简单使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本地化"><span class="nav-number">1.3.</span> <span class="nav-text">本地化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#个人本地化包"><span class="nav-number">1.3.1.</span> <span class="nav-text">个人本地化包</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#api-使用解析"><span class="nav-number">2.</span> <span class="nav-text">api 使用解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#api-清单"><span class="nav-number">2.1.</span> <span class="nav-text">api 清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#helpers"><span class="nav-number">2.2.</span> <span class="nav-text">helpers</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#randomize-array"><span class="nav-number">2.2.1.</span> <span class="nav-text">randomize(array)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#slugify-string"><span class="nav-number">2.2.2.</span> <span class="nav-text">slugify(string)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#replaceSymbolWithNumber-string-symbol"><span class="nav-number">2.2.3.</span> <span class="nav-text">replaceSymbolWithNumber(string, symbol)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#replaceSymbols-string"><span class="nav-number">2.2.4.</span> <span class="nav-text">replaceSymbols(string)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shuffle-array"><span class="nav-number">2.2.5.</span> <span class="nav-text">shuffle(array)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#address"><span class="nav-number">2.3.</span> <span class="nav-text">address</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#国家"><span class="nav-number">2.3.1.</span> <span class="nav-text">国家</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#country"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">country()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#countryCode"><span class="nav-number">2.3.1.2.</span> <span class="nav-text">countryCode()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#省份"><span class="nav-number">2.3.2.</span> <span class="nav-text">省份</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#state"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">state()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stateAbbr"><span class="nav-number">2.3.2.2.</span> <span class="nav-text">stateAbbr()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#城市"><span class="nav-number">2.3.3.</span> <span class="nav-text">城市</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#city"><span class="nav-number">2.3.3.1.</span> <span class="nav-text">city()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cityPrefix"><span class="nav-number">2.3.3.2.</span> <span class="nav-text">cityPrefix()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#citySuffix-城市后缀"><span class="nav-number">2.3.3.3.</span> <span class="nav-text">citySuffix() - 城市后缀</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#县、郡"><span class="nav-number">2.3.4.</span> <span class="nav-text">县、郡</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#county"><span class="nav-number">2.3.4.1.</span> <span class="nav-text">county()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#街道"><span class="nav-number">2.3.5.</span> <span class="nav-text">街道</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#streetName"><span class="nav-number">2.3.5.1.</span> <span class="nav-text">streetName()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#streetAddress-useFullAddress"><span class="nav-number">2.3.5.2.</span> <span class="nav-text">streetAddress(useFullAddress)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#streetPrefix"><span class="nav-number">2.3.5.3.</span> <span class="nav-text">streetPrefix()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#streetSuffix"><span class="nav-number">2.3.5.4.</span> <span class="nav-text">streetSuffix()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zipCode-format"><span class="nav-number">2.3.6.</span> <span class="nav-text">zipCode(format)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#longitude-、latitude"><span class="nav-number">2.3.7.</span> <span class="nav-text">longitude()、latitude()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#phone"><span class="nav-number">2.4.</span> <span class="nav-text">phone</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#phoneNumber-format-string"><span class="nav-number">2.4.1.</span> <span class="nav-text">phoneNumber(format: string)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#phoneNumberFormat-phoneFormatsArrayIndex-number"><span class="nav-number">2.4.2.</span> <span class="nav-text">phoneNumberFormat(phoneFormatsArrayIndex: number)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#phoneFormats-电话格式"><span class="nav-number">2.4.3.</span> <span class="nav-text">phoneFormats()电话格式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#internet"><span class="nav-number">2.5.</span> <span class="nav-text">internet</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#avatar"><span class="nav-number">2.5.1.</span> <span class="nav-text">avatar()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#email-firstName-lastName-provider"><span class="nav-number">2.5.2.</span> <span class="nav-text">email(firstName, lastName, provider)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#userName-firstName-lastName"><span class="nav-number">2.5.3.</span> <span class="nav-text">userName(firstName, lastName)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#protocol"><span class="nav-number">2.5.4.</span> <span class="nav-text">protocol()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#url"><span class="nav-number">2.5.5.</span> <span class="nav-text">url()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#domainName"><span class="nav-number">2.5.6.</span> <span class="nav-text">domainName()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#domainSuffix"><span class="nav-number">2.5.7.</span> <span class="nav-text">domainSuffix()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#domainWord"><span class="nav-number">2.5.8.</span> <span class="nav-text">domainWord()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#userAgent"><span class="nav-number">2.5.9.</span> <span class="nav-text">userAgent()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#color-baseRed255-baseGreen255-baseBlue255"><span class="nav-number">2.5.10.</span> <span class="nav-text">color(baseRed255, baseGreen255, baseBlue255)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#random"><span class="nav-number">2.6.</span> <span class="nav-text">random</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#random-number-options"><span class="nav-number">2.6.1.</span> <span class="nav-text">random.number(options)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#arrayElement-array"><span class="nav-number">2.6.2.</span> <span class="nav-text">arrayElement(array)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#objectElement-object-field"><span class="nav-number">2.6.3.</span> <span class="nav-text">objectElement(object, field)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#uuid"><span class="nav-number">2.6.4.</span> <span class="nav-text">uuid()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#boolean"><span class="nav-number">2.6.5.</span> <span class="nav-text">boolean()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#image"><span class="nav-number">2.6.6.</span> <span class="nav-text">image()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#locale"><span class="nav-number">2.6.7.</span> <span class="nav-text">locale()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#alphaNumeric"><span class="nav-number">2.6.8.</span> <span class="nav-text">alphaNumeric()</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andy</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

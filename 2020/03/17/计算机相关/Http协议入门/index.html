@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Http," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="协议介绍HTTP协议发展至今已经20多年了，至今仍在大量使用，现在已经成为网页开发必须掌握的知识了。 HTTP也叫超文本传输协议，是TCP/IP协议的应用层协议，也是万维网的数据通信基础。该协议的工作流程概括起来也就是：客户端请求和服务端响应，这个工作流程是建立在TCP连接之上的。一个完整的基于HTTP协议的请求响应过程主要包括一下几个流程：  客户端和服务端建立TCP连接 客户端请求服务端 服务">
+<meta name="keywords" content="Http">
+<meta property="og:type" content="article">
+<meta property="og:title" content="了解Http协议">
+<meta property="og:url" content="http://yoursite.com/2020/03/17/计算机相关/Http协议入门/index.html">
+<meta property="og:site_name" content="Andy的个人博客">
+<meta property="og:description" content="协议介绍HTTP协议发展至今已经20多年了，至今仍在大量使用，现在已经成为网页开发必须掌握的知识了。 HTTP也叫超文本传输协议，是TCP/IP协议的应用层协议，也是万维网的数据通信基础。该协议的工作流程概括起来也就是：客户端请求和服务端响应，这个工作流程是建立在TCP连接之上的。一个完整的基于HTTP协议的请求响应过程主要包括一下几个流程：  客户端和服务端建立TCP连接 客户端请求服务端 服务">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-04-28T15:51:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="了解Http协议">
+<meta name="twitter:description" content="协议介绍HTTP协议发展至今已经20多年了，至今仍在大量使用，现在已经成为网页开发必须掌握的知识了。 HTTP也叫超文本传输协议，是TCP/IP协议的应用层协议，也是万维网的数据通信基础。该协议的工作流程概括起来也就是：客户端请求和服务端响应，这个工作流程是建立在TCP连接之上的。一个完整的基于HTTP协议的请求响应过程主要包括一下几个流程：  客户端和服务端建立TCP连接 客户端请求服务端 服务">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/03/17/计算机相关/Http协议入门/"/>
+
+
+
+
+
+  <title>了解Http协议 | Andy的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andy的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/17/计算机相关/Http协议入门/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andy的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">了解Http协议</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-17T22:49:53+08:00">
+                2020-03-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/计算机相关/" itemprop="url" rel="index">
+                    <span itemprop="name">计算机相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="协议介绍"><a href="#协议介绍" class="headerlink" title="协议介绍"></a>协议介绍</h2><p>HTTP协议发展至今已经20多年了，至今仍在大量使用，现在已经成为网页开发必须掌握的知识了。</p>
+<p>HTTP也叫超文本传输协议，是TCP/IP协议的应用层协议，也是万维网的数据通信基础。该协议的工作流程概括起来也就是：客户端请求和服务端响应，这个工作流程是建立在TCP连接之上的。一个完整的基于HTTP协议的请求响应过程主要包括一下几个流程：</p>
+<ul>
+<li>客户端和服务端建立TCP连接</li>
+<li>客户端请求服务端</li>
+<li>服务端响应客户端</li>
+<li>请求完毕，关闭TCP连接</li>
+</ul>
+<p>这里可以简单描述一下互联网、万维网和HTTP协议之间的关系。互联网也就是多台计算机连接在一起实现相互之间可以互相访问，而我们平时说的互联网其实就是最大的全球互联网，它把全球的计算机连接在一起。互联网中有很多服务，万维网就是其中一个，它使用URL（统一资源定位器）定位资源，然后采用请求-响应的方式让请求的一方可以访问服务的一方的资源。万维网并不是一个互联网协议，但是它背后有一系列的协议和标准（Web协议族）来支撑着，其中HTTP协议就是其中之一，该协议默认使用80端口。</p>
+<p>随着互联网的发展，HTTP协议也发展了好几个版本，但是协议的工作流程本质上没有变化，变化的主要是为了适应互联网的快速发展而做的相关升级。</p>
+<h2 id="发展历史"><a href="#发展历史" class="headerlink" title="发展历史"></a>发展历史</h2><p>HTTP协议最初在20世纪90年代出现，随后经历了0.9、1.0、1.1和2几个重大版本。其中1.1版本是W3C和IETF协调定义的。后来2015年IETF正式发表了HTTP/2.0标准，正式取代HTTP/1.1的实现标准。</p>
+<h3 id="HTTP-0-9"><a href="#HTTP-0-9" class="headerlink" title="HTTP/0.9"></a>HTTP/0.9</h3><p>该版本在1991年发布。这个版本现在来看很简单，主要有以下几点：</p>
+<ul>
+<li>不传输数据包，只能传输文字，主要规定通信双方的通信格式</li>
+<li>没有数据类型（Content-type）概率，请求的内容也只有HTML网页字符串</li>
+<li>只有GET请求方法</li>
+<li>整个通信过程可以简单概况为<ul>
+<li>客户端与服务端建立TCP连接</li>
+<li>客户端请求服务端获取某个网页信息</li>
+<li>服务端依据请求返回网页信息</li>
+<li>请求完成，关闭TCP连接</li>
+</ul>
+</li>
+</ul>
+<h3 id="HTTP-1-0"><a href="#HTTP-1-0" class="headerlink" title="HTTP/1.0"></a>HTTP/1.0</h3><p>这个版本大约在1995年左右兴起，内容升级了很多，前后也因为版本改动较大花了很长时间来确定和统一标准。这里面也发生了很多有趣的故事，多多少少对该版本的发布产生影响：</p>
+<ul>
+<li>1993年美国国家超级计算机应用中心（NCSA）研发了Mosaic浏览器，能显示HTML的图像</li>
+<li>1994到1995年，网景通信公司和微软公司纷纷发布自己的浏览器</li>
+<li>Apache0.2版本出现，HTML也进入2.0版本</li>
+<li>1995年左右，微软和网景浏览器大战，各自私下拓展HTML，没有严格按照Web标准化发展，正因为这件事慢慢发展，HTML的兼容问题也慢慢出现</li>
+<li>2000年左右，网景公司衰落，Firefox浏览器，兴起，浏览器大战继续</li>
+</ul>
+<h4 id="新增的功能"><a href="#新增的功能" class="headerlink" title="新增的功能"></a>新增的功能</h4><ul>
+<li>传输内容上不仅仅可以传输文字，还能够传输图像、视频和二进制文件</li>
+<li>请求方法除了GET，还有POST和HEAD</li>
+<li>请求、响应体加了头部元数据信息，也就是我们熟知的header<ul>
+<li>比较明显的是请求头部信息添加了版本号、User-Agent、Accept等信息</li>
+<li>响应头部信息包含了版本号、Content-type、内容长度等信息。而头部信息和数据实体中间使用一个空行隔开</li>
+<li>1.0版本规定头部信息必须是ASCII编码格式，数据则可以是任何格式</li>
+</ul>
+</li>
+<li>状态码</li>
+<li>字符集</li>
+<li>分段传输</li>
+<li>鉴权、缓存、内容编码等</li>
+</ul>
+<h4 id="1-0版本的不足之处"><a href="#1-0版本的不足之处" class="headerlink" title="1.0版本的不足之处"></a>1.0版本的不足之处</h4><p>这个版本发布不久，性能问题就显现出来了。该版本客户端和服务端的通信过程本质上还是一样的，每次请求建立一次TCP连接。现在来看我们都知道TCP连接是很珍贵的，首先是连接数量有限，然后频繁的建立TCP连接是消耗性能的。简单来说1.0版本的不足主要是性能问题。</p>
+<p>这个版本其实也做了一下优化来解决这个问题，比如添加Connection字段，让客户端和服务器端不要关闭TCP连接，以此来实现多次请求公用一个TCP连接。但是因为这不是标准化的解决办法以及不能同时发起多个请求，所以不到半年，就发布了1.1版本。</p>
+<h3 id="HTTP-1-1"><a href="#HTTP-1-1" class="headerlink" title="HTTP/1.1"></a>HTTP/1.1</h3><p>这个版本进一步完善了HTTP协议，而这个协议也一直被使用至今。这个版本最明显的就是TCP连接默认是不关闭的，除非通信双方一段时间内没有任何通信活动或者其中一方主动关闭连接。除此之外，很多浏览器对同一个域名可以同时建立多个TCP连接。这就极大地提高了通信的效率。</p>
+<p>此外，该版本添加了管道机制，一个TCP连接可以同时发起多个请求，也就是说同一个TCP的请求不用一个接一个排队请求，可以多个请求同时进行。</p>
+<h4 id="分段传输"><a href="#分段传输" class="headerlink" title="分段传输"></a>分段传输</h4><ul>
+<li>Content-length</li>
+</ul>
+<p>管道机制带来的就是一个TCP连接可以同时发起多个请求，这也就意味着请求的回应也包含多个。1.0版本可以通过TCP连接关闭来确定数据已经全面回应接受，但是1.1版本之后显然这种方式不再适用，因此添加了<code>Content-length</code>字段来解决这个问题。简单来说不管一个请求的响应数据是一次性回应还是分多次回应，客户端都可以根据这个字段来判断数据是否已经全部接受。</p>
+<ul>
+<li>流模式：stream</li>
+</ul>
+<p>这个版本的传输模式也变了，从缓存模式改成了流模式。</p>
+<h4 id="其他功能"><a href="#其他功能" class="headerlink" title="其他功能"></a>其他功能</h4><ul>
+<li>请求方法添加了PUT、DELETE等</li>
+<li>请求头信息添加了Host字段</li>
+</ul>
+<h4 id="1-1版本的不足指出"><a href="#1-1版本的不足指出" class="headerlink" title="1.1版本的不足指出"></a>1.1版本的不足指出</h4><p>服务端响应请求是按顺序的，所以即使客户端请求的顺序，服务端最终也会按顺序一个一个的排队响应。这个就是“队头阻塞”</p>
+<h3 id="HTTP-2"><a href="#HTTP-2" class="headerlink" title="HTTP/2"></a>HTTP/2</h3><h4 id="二进制传输"><a href="#二进制传输" class="headerlink" title="二进制传输"></a>二进制传输</h4><p>不管是头信息还是数据体，都是二进制传输，也叫数据帧。数据帧包括头部帧和数据帧。</p>
+<h4 id="多路复用"><a href="#多路复用" class="headerlink" title="多路复用"></a>多路复用</h4><p>请求和响应都可以同时多个进行，不需要根据请求顺序一个个响应</p>
+<h4 id="头信息压缩"><a href="#头信息压缩" class="headerlink" title="头信息压缩"></a>头信息压缩</h4><p>前面版本每个请求的头信息都是独立的，也就是每次请求都需要发送全部的头信息，该版本对这个进行了优化，授信是头信息要经过压缩，然后重复请求的头信息通过一些机制来避免重复发送</p>
+<h4 id="服务端主动向客户端推送"><a href="#服务端主动向客户端推送" class="headerlink" title="服务端主动向客户端推送"></a>服务端主动向客户端推送</h4><p>这个版本中服务端可以主动给客户端推送信息，比较容易理解的例子就是有些数据是客户端一定回请求的，所以在客户端请求之前提前给客户端推送过去。比如用户请求了一个网页，跟这个网页相关的一些静态资源就可以构成服务端主动推送的数据了。</p>
+<h2 id="请求方法和状态码"><a href="#请求方法和状态码" class="headerlink" title="请求方法和状态码"></a>请求方法和状态码</h2><h3 id="请求方法"><a href="#请求方法" class="headerlink" title="请求方法"></a>请求方法</h3><p>服务端的资源大体可以分为静态的和动态的资源。静态资源可以理解为URL，动态资源可以理解为API。当然对应前端而言，它不管是URL还是API，他都理解成附带Content-type的URL，只是除了纯粹的获取资源外，还能根据不同的请求方法和请求数据产生交互的效果。这就是请求方法的作用。一般常用的请求方法和作用为</p>
+<ul>
+<li>GET：获取资源</li>
+<li>POST：新建资源</li>
+<li>PUT：修改资源</li>
+<li>DELETE：删除资源</li>
+</ul>
+<p>这是常用的请求方法，其他方法这就不一一列举。旧版本的HTTP协议，新建、修改和删除资源基本都是通过POST方法来实现，不过随着现在RESTful API标准，不同的请求方法应该对应不同的资源处理场景。</p>
+<h3 id="状态码"><a href="#状态码" class="headerlink" title="状态码"></a>状态码</h3><p>客户端根据URL请求服务端，它可能对应静态资源的路径，也有可能对应一个接口地址，但是不管如何，静态资源也有可能不存在、接口处理也有可能出现异常，所以服务器需要明确告知用户请求处理的结果。状态码就是用来区分不同的请求处理结果的。常用状态码主要分成5大类，基本也是按照状态码的开头数字区分</p>
+<ul>
+<li>2xx状态码：处理成功。最常用的是200，表示请求处理成功和响应</li>
+<li>3xx状态码：重定向</li>
+<li>4xx状态码：客户端错误<ul>
+<li>400：一般是参数有误</li>
+<li>401：未登录授权</li>
+<li>403：没有权限，不允许访问</li>
+<li>404：资源不存在</li>
+<li>405：请求方法不正确</li>
+</ul>
+</li>
+<li>5xx状态码：服务端错误<ul>
+<li>500：客户端请求没问题，服务端处理异常</li>
+<li>503：服务器不能处理请求，如服务器在维护中</li>
+</ul>
+</li>
+</ul>
+<h2 id="TODO"><a href="#TODO" class="headerlink" title="#TODO"></a>#TODO</h2><ul>
+<li><p>Cookie和Session</p>
+</li>
+<li><p>Referer和防盗链</p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Http/" rel="tag"># Http</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/02/23/数据库相关/Redis笔记/" rel="next" title="Redis使用笔记">
+                <i class="fa fa-chevron-left"></i> Redis使用笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/17/计算机相关/git使用笔记/" rel="prev" title="Git使用笔记">
+                Git使用笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Andy" />
+            
+              <p class="site-author-name" itemprop="name">Andy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#协议介绍"><span class="nav-number">1.</span> <span class="nav-text">协议介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#发展历史"><span class="nav-number">2.</span> <span class="nav-text">发展历史</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-0-9"><span class="nav-number">2.1.</span> <span class="nav-text">HTTP/0.9</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-1-0"><span class="nav-number">2.2.</span> <span class="nav-text">HTTP/1.0</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#新增的功能"><span class="nav-number">2.2.1.</span> <span class="nav-text">新增的功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-0版本的不足之处"><span class="nav-number">2.2.2.</span> <span class="nav-text">1.0版本的不足之处</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-1-1"><span class="nav-number">2.3.</span> <span class="nav-text">HTTP/1.1</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#分段传输"><span class="nav-number">2.3.1.</span> <span class="nav-text">分段传输</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他功能"><span class="nav-number">2.3.2.</span> <span class="nav-text">其他功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1版本的不足指出"><span class="nav-number">2.3.3.</span> <span class="nav-text">1.1版本的不足指出</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-2"><span class="nav-number">2.4.</span> <span class="nav-text">HTTP/2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#二进制传输"><span class="nav-number">2.4.1.</span> <span class="nav-text">二进制传输</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多路复用"><span class="nav-number">2.4.2.</span> <span class="nav-text">多路复用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#头信息压缩"><span class="nav-number">2.4.3.</span> <span class="nav-text">头信息压缩</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务端主动向客户端推送"><span class="nav-number">2.4.4.</span> <span class="nav-text">服务端主动向客户端推送</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#请求方法和状态码"><span class="nav-number">3.</span> <span class="nav-text">请求方法和状态码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#请求方法"><span class="nav-number">3.1.</span> <span class="nav-text">请求方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#状态码"><span class="nav-number">3.2.</span> <span class="nav-text">状态码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TODO"><span class="nav-number">4.</span> <span class="nav-text">#TODO</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andy</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

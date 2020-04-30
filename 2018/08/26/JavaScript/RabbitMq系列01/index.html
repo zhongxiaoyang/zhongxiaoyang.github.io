@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="NodeJs,RabbitMq," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这段时间自己做的一个事情是在项目中使用 RabbitMq 做数据的转换。之后自己开始从 知道 到去 了解 再到 集成到项目上 花了一些功夫，中间也遇到一些 bug。现在即将开始去另一个项目，对于这块知识不想因为一段时间不用就忘了，抽个有空的时间把它整理作为博客或者笔记写下，也算是给自己一个交代了。 消息队列 (MQ)MQ 就是指消息队列，下面统一使用 MQ。本文的知识来源主要是从一本关于 Rabb">
+<meta name="keywords" content="NodeJs,RabbitMq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMq系列一之了解消息队列">
+<meta property="og:url" content="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/index.html">
+<meta property="og:site_name" content="Andy的个人博客">
+<meta property="og:description" content="这段时间自己做的一个事情是在项目中使用 RabbitMq 做数据的转换。之后自己开始从 知道 到去 了解 再到 集成到项目上 花了一些功夫，中间也遇到一些 bug。现在即将开始去另一个项目，对于这块知识不想因为一段时间不用就忘了，抽个有空的时间把它整理作为博客或者笔记写下，也算是给自己一个交代了。 消息队列 (MQ)MQ 就是指消息队列，下面统一使用 MQ。本文的知识来源主要是从一本关于 Rabb">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/stock_consulting_01.jpg">
+<meta property="og:image" content="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/stock_consulting_02.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/stock_consulting_03.jpg">
+<meta property="og:image" content="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/mq架构图.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/mq_management.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/mq_demo_show.jpeg">
+<meta property="og:updated_time" content="2020-04-17T06:01:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RabbitMq系列一之了解消息队列">
+<meta name="twitter:description" content="这段时间自己做的一个事情是在项目中使用 RabbitMq 做数据的转换。之后自己开始从 知道 到去 了解 再到 集成到项目上 花了一些功夫，中间也遇到一些 bug。现在即将开始去另一个项目，对于这块知识不想因为一段时间不用就忘了，抽个有空的时间把它整理作为博客或者笔记写下，也算是给自己一个交代了。 消息队列 (MQ)MQ 就是指消息队列，下面统一使用 MQ。本文的知识来源主要是从一本关于 Rabb">
+<meta name="twitter:image" content="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/stock_consulting_01.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/"/>
+
+
+
+
+
+  <title>RabbitMq系列一之了解消息队列 | Andy的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andy的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/26/JavaScript/RabbitMq系列01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andy的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">RabbitMq系列一之了解消息队列</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-26T12:31:06+08:00">
+                2018-08-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index">
+                    <span itemprop="name">JavaScript</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/NodeJs/" itemprop="url" rel="index">
+                    <span itemprop="name">NodeJs</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><em>这段时间自己做的一个事情是在项目中使用 RabbitMq 做数据的转换。之后自己开始从 <strong>知道</strong> 到去 <strong>了解</strong> 再到 <strong>集成到项目上</strong> 花了一些功夫，中间也遇到一些 bug。现在即将开始去另一个项目，对于这块知识不想因为一段时间不用就忘了，抽个有空的时间把它整理作为博客或者笔记写下，也算是给自己一个交代了。</em></p>
+<h2 id="消息队列-MQ"><a href="#消息队列-MQ" class="headerlink" title="消息队列 (MQ)"></a>消息队列 (MQ)</h2><p><code>MQ</code> 就是指消息队列，下面统一使用 <code>MQ</code>。本文的知识来源主要是从一本关于 <code>RabbitMq</code> 的书籍和 <code>amqplib</code> 库的文档。这篇文章不会介绍 <code>MQ</code> 的技术细节，会介绍消息队列的历史和使用场景，如果读者读完这篇文章有不理解的或者希望了解更多东西，可以详细地去看里面的资料，后续也会继续写关于 <code>MQ</code> 技术细节的文章。</p>
+<p> RabbitMq 的书籍： 《RabbitMQ实战》</p>
+<p>amqplib 的 GitHub 地址：<a href="https://github.com/squaremo/amqp.node" target="_blank" rel="noopener">https://github.com/squaremo/amqp.node</a></p>
+<h2 id="MQ-是啥"><a href="#MQ-是啥" class="headerlink" title="MQ 是啥"></a>MQ 是啥</h2><h3 id="例子：股票咨询功能"><a href="#例子：股票咨询功能" class="headerlink" title="例子：股票咨询功能"></a>例子：股票咨询功能</h3><h4 id="V1-0"><a href="#V1-0" class="headerlink" title="V1.0"></a>V1.0</h4><p>假设我们要做一个 <strong>股票未来走势预测</strong> 的功能，用户交互可能很简单，就如 <strong>图2.1.1</strong>：</p>
+<p><img src="/2018/08/26/JavaScript/RabbitMq系列01/stock_consulting_01.jpg" alt=""></p>
+<center>图2.1.1</center>
+
+<p>然而某些情况下，这样的设计 (客户端发送一个 HTTP 请求等待结果) 可能会有问题：</p>
+<ul>
+<li>核心服务可能是一个耗时的计算，或者客户端网络不佳，容易导致客户端请求超时</li>
+<li>这个服务可能很受用户欢迎，大量的股票投资者或者兴趣爱好者使用它做咨询，从而导致大量的并发，并最终导致服务窘机或者用户超时</li>
+</ul>
+<h4 id="V2-0"><a href="#V2-0" class="headerlink" title="V2.0"></a>V2.0</h4><p>基于 <strong>v1.0</strong> 可能导致的一些问题，我们需要做个优化，我们要改变用户交互的方式</p>
+<ul>
+<li>不能让用户参与后端的业务处理过程</li>
+<li>控制用户访问的并发</li>
+</ul>
+<p>改善之后的流程图可能就如 <strong>图2.1.2</strong>：</p>
+<p><img src="/2018/08/26/JavaScript/RabbitMq系列01/stock_consulting_02.jpeg" alt=""></p>
+<center>图2.1.2</center>
+
+<p>优化之后的流程有一些变化，客户端不再是发了 HTTP 请求就能得到咨询结果，而是</p>
+<ul>
+<li><strong>客户端</strong> 发起 HTTP 请求给 <strong>API后台</strong></li>
+<li><strong>API后台</strong> 录入一个咨询任务到 <strong>数据库</strong>，并返回给 <strong>客户端</strong> 任务录入成功</li>
+<li><strong>定时任务</strong> 定时调用 <strong>API后台</strong> 跑咨询任务</li>
+<li><strong>API后台</strong> 从 <strong>数据库</strong> 读取一定数量(根据业务场景合理设定) 的 <strong>咨询任务</strong></li>
+<li><strong>API后台</strong> 调用 <strong>核心服务</strong> 得到任务计算结果</li>
+<li><strong>API后台</strong> 短信通知 <strong>用户</strong></li>
+</ul>
+<p>我们评估一下这样的改动造成了什么影响</p>
+<ul>
+<li>用户不需要一直等待结果返回，只需短信过来的时候看短信就好，这样的例子我们经常看到</li>
+<li>后台根据自己的能力，每次处理一定量的任务，不会因为突然到来的大量请求把服务搞垮</li>
+</ul>
+<h4 id="V3-0-使用-MQ"><a href="#V3-0-使用-MQ" class="headerlink" title="V3.0 - 使用 MQ"></a>V3.0 - 使用 MQ</h4><p>其实 V2.0 的设计就已经很像 MQ 了，但是我们还是按照流程先给出流程图，然后再来分析：</p>
+<p><img src="/2018/08/26/JavaScript/RabbitMq系列01/stock_consulting_03.jpg" alt=""></p>
+<center>图2.1.3</center>
+
+<p>看到流程图，客户端的交互跟 V2.0 是一样的，不同的地方是 DB 换成了 MQ，API后台与 MQ、核心服务的交互变简单了。</p>
+<ul>
+<li><strong>API后台</strong> 收到 <strong>客户端</strong> 的 HTTP 请求后发送一条消息到 <strong>MQ</strong>，然后返回给 <strong>客户端</strong> 请求成功</li>
+<li><strong>MQ</strong> 将消息推送给 <strong>核心服务</strong> 处理</li>
+<li><strong>核心服务</strong> 处理完毕之后 确认消息</li>
+<li>短信通知 <strong>用户</strong></li>
+</ul>
+<p><strong>这里例子当中，MQ 主导了消息的存储和消费过程，API后台 只负责将消息给送给 MQ，核心服务从 MQ 得到消息来处理并返回给 用户。在这整个实现中，任务处理过程是异步的，API后台 与 核心服务 完全解耦，相互不知道对方。单从这个实现上就有几个好处：</strong></p>
+<ul>
+<li>业务使用了异步，服务端不需要并发处理所有用户的请求，不会给服务端太大的压力</li>
+<li>解耦<ul>
+<li>用户不需要在页面中静静地等待，他大可以在请求完之后去做其他的事情，等恰当的时机看短信就好</li>
+<li>API后台 不需要直接调用 核心服务，实现了服务之间的松耦合</li>
+</ul>
+</li>
+<li>控制并发，核心服务 可以设置并发的量(prefetch)，MQ 会根据这个值控制一次性推送消息的量给 核心服务</li>
+</ul>
+<h4 id="例子总结"><a href="#例子总结" class="headerlink" title="例子总结"></a>例子总结</h4><p>前面的例子引出了 MQ，我们能从例子中大致知道 MQ 在起了什么作用，它看起来就好像是消息的搬运工一样。不过 MQ 做的事情比搬运工多多了，<strong>它参与了每一个消息从产生到消费完毕的生命周期、让消息发送方和消息消费方实现了松耦合、让消息的处理变成异步。。。</strong></p>
+<p>从例子我们只对 MQ 有了一个很模糊的映像，到底 MQ 长什么样子，它的工作机制是什么样的我们还不知道，我们需要进一步了解下 MQ 的架构图</p>
+<h3 id="MQ-架构图"><a href="#MQ-架构图" class="headerlink" title="MQ 架构图"></a>MQ 架构图</h3><p>这一节会讲到在 MQ 的整个架构中，我们的服务是什么角色，MQ 作为什么角色存在，他们是如何结合在一个工作的，我们先看一张从网络上爬下来的 MQ 的简单架构图：</p>
+<p><img src="/2018/08/26/JavaScript/RabbitMq系列01/mq架构图.jpeg" alt=""></p>
+<center>图2.2.1</center>
+
+<p>图2.2.1 中虽然没有一个中文看着有点晕，但是其实挺容易理解的。上一节 <strong>股票咨询功能</strong> 的例子中我们知道有一个 <strong>消息的发送方(API后台)</strong>、<strong>消息的接收方(MQ)</strong> 以及 <strong>消息的处理方(核心服务)</strong>，再看下这个张图，也能猜得出 P 就是消息的发送方(生产者)，C 就是消息的处理方(消费者)，中间的部分就是 MQ服务器 了。</p>
+<p>在 MQ 的整个流程当中，会有两类角色：客户端(生产者和消费者)、服务端(MQ)。<strong>客户端需要与服务端建立连接才能发送或者消费消息，这个机制看起来服务端有点像一个数据库，只是他的数据存储在内存当中。</strong>生产者和消费者的下面会详细介绍，它们都是对于使用 MQ 来说必不可少的角色</p>
+<p>MQ服务器 内部有两个主要的部件：交换器(exchange) 和 队列(queue)。交换器就好比如 <strong>门</strong>，生产者发送的消息首先经过交换器这扇大门，然后经由交换器找到对应的队列后将消息列入队列，交换器有一种机制可能知道这个消息应该放到哪个队列里面；队列就是存储消息的地方，先进来的消息会优先被消费，这是队列先入先出的特点。</p>
+<p>说了前面这几段话，生产者发送的消息首先经过 MQ服务器 的交换器，经由交换器将消息放到指定的队列。这里的消息就是数据，生产者发送消息就是将一个数据(可以理解成请求参数，可以是字符串这些基本类型，也可以是对象、数组甚至二进制类型)发送给MQ服务器，MQ服务器在将这个数据发送给消费者，消费者接受到这个消息就可以看到消息的数据了。</p>
+<h4 id="生产者-Produce"><a href="#生产者-Produce" class="headerlink" title="生产者(Produce)"></a>生产者(Produce)</h4><p>生产者负责发送消息，一个生产者可以将消息发送到多个消息队列里面，具体发送到什么队列，只需在发送之前执行消息发送的队列名称就行了，使用很简单。生产者整个流程可以总结为：</p>
+<ul>
+<li>连接 MQ 服务器，与服务器建立一个 TCP 连接</li>
+<li>获取信道</li>
+<li>声明交换器</li>
+<li>声明队列</li>
+<li>创建消息</li>
+<li>发布消息</li>
+<li>关闭信道</li>
+<li>关闭连接</li>
+</ul>
+<h4 id="消费者-Consume-负责消费-MQ服务器-的消息"><a href="#消费者-Consume-负责消费-MQ服务器-的消息" class="headerlink" title="消费者(Consume) - 负责消费 MQ服务器 的消息"></a>消费者(Consume) - 负责消费 MQ服务器 的消息</h4><p>消费者负责消费消息，一个消费者可以消费多条队列的消息，多个消费者也可以消费同一个队列的消息。消费者消费消息的流程可以总结为：</p>
+<ul>
+<li>连接 MQ服务器，与服务器建立 TCP 连接</li>
+<li>获取信道</li>
+<li>声明交换器</li>
+<li>声明队列</li>
+<li>把队列跟交换器绑定起来</li>
+<li>消费消息</li>
+<li>关闭信道</li>
+<li>关闭连接</li>
+</ul>
+<h4 id="交换器"><a href="#交换器" class="headerlink" title="交换器"></a>交换器</h4><p>生成者和消费者的流程都可以声明交换器，交换器也是图中绿色的部分，交换器配置了一个消息路由到队列的规则，RabbitMq提供了4中交换器</p>
+<ul>
+<li>direct交换器：严格匹配</li>
+<li>fanout交换器：将收到的消息广播到绑定的队列上</li>
+<li>topic交换器：可以将不同源头的消息到达同一个队列</li>
+</ul>
+<h2 id="MQ-使用场景分析"><a href="#MQ-使用场景分析" class="headerlink" title="MQ 使用场景分析"></a>MQ 使用场景分析</h2><p>局限于经验和业务，场景分析主要是对于网上知乎的说法的总结，最终自己也没有理解的很深刻。就像有些设计模式一样，知道它是啥，但是没有理解的深刻</p>
+<p>从前面部分可能知道 MQ 是有用的，也知道了它是个什么东西，对于实现我们的业务起到什么作用。但是我们怎么去理解 MQ 的使用场景了，当我们设计一个业务的时候，我们怎么能够想到这个业务需要用到 MQ呢，这也是本节需要讲的</p>
+<h3 id="MQ的历史"><a href="#MQ的历史" class="headerlink" title="MQ的历史"></a>MQ的历史</h3><p>来自书籍《RabbitMq实战第一章节》</p>
+<p>在1983年，一个年轻的工程师提出一个问题：为什么没有一种通用的通信系统，可以解决应用程序建繁重的信息通信工作？</p>
+<p>来自MIT的硬件设计教育工作者Vivek Ranadive设想了一种通用的软件总线，就像主板上的总线那样，供其他应用程序接入，因此在1983年Teknekron诞生了。</p>
+<p>1985年Ranadive找到了他的第一个客户以及软件总线天生用来解决的问题：金融交易。但是交易员的小隔间内挤满了用来完成交易的不同终端，每台终端上显示着不同类型的信息。Ranadive发觉这会是个机会：替换掉所有那些终端和孤立的应用程序。在交易员位置上将会是Ranadive的软件总线，而桌上只会剩下一台工作站。工作站的显示程序可以作为消费者接入Teknekron软件总线，并允许交易员“订阅”他想要看到的信息。于是发布订阅模式（PubSub）诞生了，同时还诞生了世界上第一个现代消息队列软件：Teknekron和The information bus(TIB)</p>
+<p>用不了多久，这种数据传输模型就找到了更多啥手机用途。最终，发布数据的应用和消费数据的应用再也不用直接连接在一起了。他们甚至都不需要对方的存在。Teknekron的TIB允许应用开发者建立一系列的规则去描述消息内容。只要消息按照这些规则发布出去，任何消费者应用都能订阅感兴趣的消息。现在信息的生产者和消费者之间可以完全解耦，并且可以在传输过程中灵活混合。PubSub模型的任意一边可以完全互换不会影响另一边。唯一需要保持稳定的是TIB软件以及标记和路由信息规则。由于在哪个时期金融交易行业门庭若市，因此TIB迅速传播开来。它引起了电信特别是新闻机构的注意。这些行业也特别需要将信息及时发布给千变万化的客户，这也就是为啥1994年大型新闻机构路透社收购了Teknekron。</p>
+<p>20世纪80年代，IBM开始研究开发自己的消息队列软件，运用他们在开发DB2时信息投递的丰富经验，开发工作始于1990年，开发3年后IBM MQ产品系列面世。之后17年，MQ系列进化成了WebSphere MQ并统治着商业消息队列平台市场。在那段时间，Ranadive的TIB并没有消失在路透社腹中。相反它任然是企业通信市场的主要参与者，并且更名为Rendezvous而走向繁荣。在1997年Teknekron以TIBCO的形式作为一家独立公司再度出现。童年微软也在消息通信市场崭露头角：微软消息队列(MSMQ)</p>
+<p>通过了一系列的革新，消息队列软件主要留住了大型组织机构，他们需要可靠性、解耦以及实时消息通信。为什么MQ不去寻找更大的市场呢？它是如何度过20世纪90年代末网络泡沫的呢？毕竟从Twitter到Salesforce.com，当今所有的这些企业都在努力创建内部方案来解决25年前TIB就已经解决的PubSub问题。一句话：供应商壁垒。商业MQ供应商想要解决应用互通的问题，而不是去创建标准接口来允许不同的MQ产品互通，或者允许应用程序来更改MQ平台。供应商壁垒维持着足够高的价格和利润率，并使得这些商业MQ软件对那些当今繁荣昌盛的初创公司和Web 2.0公司来说遥不可及</p>
+<p>结果，中小技术公司并不是唯一一个对高价MQ供应商感到不满的，那些造就MQ产业的金融服务公司对此也激动不已。越是大型金融公司余越不可避免地使用来自众多供应商的MQ产品，来服务企业内部的不同应用。如果应用已经订阅了TIBCO MQ信息，若突然需要消费来自IBM MQ的消息，则实现起来会非常困难。这些产品使用了不同的API，不同的协议，因而毫无疑问无法联合起来组成单一的总线。为了解决这个问题，JMS在2001年诞生了。JMS试图通过公共Java API的方式，隐藏单独MQ产品供应商提供的实际接口，从而跨越了壁垒和解决了互通的问题。从技术上讲，Java应用程序只需针对JMS API编程，选择合适的MQ驱动即可。JMS会打理好其他部分。问题是你在尝试使用单独标准化接口来胶合众多不同的接口，这就像是把不同类型的衣服粘合在一起。使用JMS的应用程序会变得更加脆弱，我们需要新的消息通讯标准化方案</p>
+<h4 id="AMQP"><a href="#AMQP" class="headerlink" title="AMQP"></a>AMQP</h4><p>2004年，JPMorgan Chase需要一个更好的消息通信解决方案，并开始和iMatix公司一起合作开发Advanced Message Queuing Protocol (AMQP，高级消息队列协议)。AMQP从一开始就设计为开放标准，已解决众多的消息队列需求和拓扑结构问题。凭借开发，任何人都可以执行这一标准，针对标准编码的任何人都可以和任意AMQP供应商提供的MQ服务器进行交互</p>
+<p>在很多方面，AMQP承诺把我们的厂商解救出来，并且实现Ranadive最初的愿景：从任何发布者到任何感兴趣的消费者之间的信息，通过一条软件总线实时动态连接起来</p>
+<h4 id="RabbitMq"><a href="#RabbitMq" class="headerlink" title="RabbitMq"></a>RabbitMq</h4><p>本世纪出，Alexis Richardson创办了专门研究Java对象缓存的Metalogic公司，Matthias在LShift工作，LShift正投入和一家大型软件供应商的合同，专注于语言建模和分布式计算。这些领域方面的北京出发了Matthias对Erlang的兴趣。Erlang是Ericsson原本为了电话交换机而开发的编程语言。引起来Matthias的注意的是Erlang在分布式编程和健壮的故障恢复方面的表现出色</p>
+<p>在2005年左右，Alexis创办了CohesiveFT。他们提供应用栈和工具，在今天主键成为云计算。对Alexis来说，应用栈最关键的部分是分布式消息通信。他开始找Matthias探讨AMQP。他们聚集在三个问题上：</p>
+<ul>
+<li>那些大型金融机构是否会在意他们的消息代理服务器使用Erlang语言编写的</li>
+<li>Erlang语言是否真的是编写AMQP服务器的最佳选择</li>
+<li>如果采用Erlang语言编写，是否会影响开源社区对它的采纳</li>
+</ul>
+<p>这三个问题后面都得到解决，Alexis和Matthias说服了CohesiveFT和LShift共同支持这个项目。他们首先是签约了Matthew Sackman，让他用Erlang语言写了一个原型测试网络延迟。他们很快发现用Erlang编写的分布式计算库有着可原生Socket一样的延迟。因此在2006年，Rabbit Technologies诞生了：一家由CohesiveFT和LShift合资的企业，其拥有者RabbitMq的知识产权</p>
+<p>就在当时，AMQP规范的第一份公开草案也公之于众了，作为一份新的规范，AMQP正快速修订。这正是Erlang可以施展拳脚的地方。通过使用Erlang，RabbitMq可以快速开发并跟上AMQP标准前进的节奏。</p>
+<p>最初，RabbitMq实现了AMQP的一个关键特性，使其有别于TIBCO和IBM：使用协议本身就可以对象队列和交换器这样的资源进行配置。对于商业供应商来说，资源配置需要通过特定的管理终端的特定工具才可以完成。RabbitMq的资源配置能力使其成为构件分布式应用的最完美的通信总线，特别有助于充分利用基于云的资源和快速开发</p>
+<p>就这样一直到今天，RabbitMq广泛使用在小到硅谷的初创公司达到互联网巨头。对于RabbitMq来说，那也许就是最好的事情了。RabbitMq实现了Ranadive的愿景，RabbitMq为我们提供了一个强大的工具来解决那些问题，并给我们带来了一段丰富的消息通信历史，以及适合所有人的可插拔的信息总线</p>
+<p><strong>今天，RabbitMq并不是开发消息通信的唯一选择，想ActiveMQ、ZeroMQ和Apache Qpid都提供了不同的开源消息队列方案。</strong></p>
+<p>从看消息队列的历史，我们可以知道在漫长的发展中，消息队列是为什么存在的，它的初衷以及发展到现在的功能，它能解决什么问题，能解决我们的什么痛点。参照历史去了解消息队列，会了解的更加深刻一些。</p>
+<p>很明显，我们知道了，AMQP是一种规范，它允许来自不同供应商的消息生产者和消费者实现真正的互操作拓展，就如同 SMTP，HTTP，FTP等协议那样。而RabbitMq是完成遵循AMQP规范的，它比竞争对手更加可靠，更能防止崩溃，另外它极易安装和使用。</p>
+<h3 id="什么时候需要-MQ"><a href="#什么时候需要-MQ" class="headerlink" title="什么时候需要 MQ"></a>什么时候需要 MQ</h3><p>通常，MQ 常用的场景有业务解耦，最终一致性，广播，错峰流控</p>
+<h4 id="异步"><a href="#异步" class="headerlink" title="异步"></a>异步</h4><p>异步是相对于同步而言的，同步是阻塞，异步是非阻塞。异步就是A调用B之后不需要等待B返回结果而继续执行B之后的代码。</p>
+<p>消息队列的实现方法就是异步，生成者发送消息之后不需要等待消费者处理完消息才往下执行，大大提高了请求性能</p>
+<h4 id="解耦"><a href="#解耦" class="headerlink" title="解耦"></a>解耦</h4><p>使用 <strong>MQ</strong> 经常可以解决我们业务中系统之间或者模块之间的耦合，很多时候某个系统在处理某个业务的时候依赖其他服务，而一旦形成了依赖关系，则其他系统的稳定性就直接影响了这个系统的稳定性</p>
+<p>假设现在有订单管理和积分管理两个系统，对于用户下单请求创建订单的流程</p>
+<p>传统的做法是用户下单的时候 <strong>订单管理系统</strong> 需要调用 <strong>积分管理系统</strong> 扣减用户积分成果后返回下单成功，如果调用 <strong>积分管理系统</strong> 失败，订单创建失败</p>
+<p>使用 <strong>MQ</strong> 之后变成用户下单的时候 <strong>订单系统</strong> 发送消息给 <strong>MQ</strong>，然后返回下单成功，<strong>MQ</strong> 在 <strong>积分管理系统</strong> 正常处理的时候讲消费推送给它处理，这种使用了 <strong>MQ</strong> 解耦了 <strong>订单管理系统</strong> 与 <strong>积分管理系统</strong> 有以下好处</p>
+<ul>
+<li>就算积分管理系统出现暂时的无法访问，也不会影响用户正常的下单</li>
+<li>订单管理系统处理时间缩短，减少了用户下单等待时间</li>
+<li>就算积分管理系统突然改了域名，也不会导致订单管理系统不能请求</li>
+</ul>
+<p><strong>就算订单管理系统和积分管理系统不是在两个独立的系统里面，而是一个系统的两个模块，使用消息队列将两个模块解耦也是有意义的。</strong></p>
+<p>比如 node.js 中，模块调用我们可能会想到使用 <strong>EventEmitter</strong> 来解耦模块之间调用，而 <strong>EventEmitter</strong> 的底层实现方式就是消息队列</p>
+<p>TODO: EventEmitter的并发问题</p>
+<h4 id="最终一致性"><a href="#最终一致性" class="headerlink" title="最终一致性"></a>最终一致性</h4><p>最终一致性要求请求能够正常被处理(高可靠)，不会因为某些原因(服务异常、超时)导致请求被异常处理。可以依靠 <strong>MQ</strong> 来做到最终一致性，因为 <strong>MQ</strong> 会将消息发送给已经准备好消费的消费者系统处理，在消息处理过程中依赖消费者确认消息来保证消息被正常处理</p>
+<h4 id="广播"><a href="#广播" class="headerlink" title="广播"></a>广播</h4><p>消息队列的基本功能之一是进行广播。如果没有消息队列，每当一个新的业务方接入，我们都要联调一次新接口。有了消息队列，我们只需要关心消息是否送达了队列，至于谁希望订阅，是下游的事情，无疑极大地减少了开发和联调的工作量。</p>
+<p>比如我们有个 <strong>用户信息管理系统</strong>，包含用户的 <strong>注册，认证，更新信息</strong> 等功能，另外有 <strong>风控，客服，推广等系统</strong> 都需要实时知道用户注册了，认证了，改资料了。</p>
+<p>传统的做法每当用户注册、认证或者更新信息，我们都需要显示调用其他需要实时知道情况的系统。这就僵硬了，如果这些系统下线了，或者域名变更又或者有新的系统加入通知，这个 <strong>用户信息管理系统</strong> 都需要做出相应的改动，更恶心的是他们的重构可能要求你配合他们测试或者上线。</p>
+<p>使用 <strong>MQ</strong> 整个过程实现解耦，用户注册的时候 <strong>用户信息管理系统</strong> 只需关心消息是否发送成功，至于其他需要关心用户注册、认证和更改信息的系统，使用topic监听和消费队列消息就完事了。</p>
+<p>广播大家都熟悉，一个广播发布者，多个监听者。就比如订阅报纸，你订阅了南方日报，每当有新报纸，你都能收到一样，你不用管是哪个报社发出来的，或者是哪个送报人员送的，你这需要管你收到没有。<strong>MQ</strong> 专门为了这类需求提供了topic这种交换器</p>
+<h4 id="错峰与流控"><a href="#错峰与流控" class="headerlink" title="错峰与流控"></a>错峰与流控</h4><p>前面有说道 <strong>消费者</strong> 消费消息的时候可以设置消息的并发值，一旦设置了相应的并发值，<strong>MQ</strong> 会根据消息确认情况确保消费者系统同一时间在处理一定数量的请求，所以这种情况就可以有效避免突然增加的请求导致服务高负荷</p>
+<p>试想上下游对于事情的处理能力是不同的。比如，Web前端每秒承受上千万的请求，并不是什么神奇的事情，只需要加多一点机器，再搭建一些LVS负载均衡设备和Nginx等即可。但数据库的处理能力却十分有限，即使使用SSD加分库分表，单机的处理能力仍然在万级。由于成本的考虑，我们不能奢求数据库的机器数量追上前端。</p>
+<p>这种问题同样存在于系统和系统之间，如短信系统可能由于短板效应，速度卡在网关上（每秒几百次请求），跟前端的并发量不是一个数量级。但用户晚上个半分钟左右收到短信，一般是不会有太大问题的。如果没有消息队列，两个系统之间通过协商、滑动窗口等复杂的方案也不是说不能实现。但系统复杂性指数级增长，势必在上游或者下游做存储，并且要处理定时、拥塞等一系列问题。而且每当有处理能力有差距的时候，都需要单独开发一套逻辑来维护这套逻辑。所以，利用中间系统转储两个系统的通信内容，并在下游系统有能力处理这些消息的时候，再处理这些消息，是一套相对较通用的方式。</p>
+<p><strong>总而言之，消息队列不是万能的。对于需要强事务保证而且延迟敏感的，RPC是优于消息队列的。</strong></p>
+<p><strong>对于一些无关痛痒，或者对于别人非常重要但是对于自己不是那么关心的事情，可以利用消息队列去做。</strong></p>
+<p><strong>支持最终一致性的消息队列，能够用来处理延迟不那么敏感的“分布式事务”场景，而且相对于笨重的分布式事务，可能是更优的处理方式。</strong></p>
+<p><strong>当上下游系统处理能力存在差距的时候，利用消息队列做一个通用的“漏斗”。在下游有能力处理的时候，再进行分发。</strong></p>
+<p><strong>如果下游有很多系统关心你的系统发出的通知的时候，果断地使用消息队列吧。</strong></p>
+<h2 id="快速搭建一个-RabbitMq-服务器"><a href="#快速搭建一个-RabbitMq-服务器" class="headerlink" title="快速搭建一个 RabbitMq 服务器"></a>快速搭建一个 RabbitMq 服务器</h2><p>docker 提供了 RabbitMq 专门的容器，你可以直接把镜像pull下来就可以快速搭建一个属于自己的 RabbitMq 容器了</p>
+<p>下面提供了一个很简单的docker-compose.yml文件</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">version: <span class="string">'3.2'</span></span><br><span class="line">services:</span><br><span class="line">  rabbitmq:</span><br><span class="line">    image: <span class="string">'rabbitmq:3.6.6-management'</span></span><br><span class="line">    environment:</span><br><span class="line">      - RABBITMQ_DEFAULT_USER=Andy</span><br><span class="line">      - RABBITMQ_DEFAULT_PASS=Andy2go</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">'5672:5672/tcp'</span></span><br><span class="line">      - <span class="string">'15672:15672/tcp'</span></span><br></pre></td></tr></table></figure>
+<p>然后在文件目录下执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>就这样 rabbitmq 服务就起来了</p>
+</li>
+<li><p>浏览器访问【<a href="http://localhost:15672/】，再输入账号秘密，尽可以进入" target="_blank" rel="noopener">http://localhost:15672/】，再输入账号秘密，尽可以进入</a> mq web管理界面</p>
+</li>
+</ul>
+<p><img src="/2018/08/26/JavaScript/RabbitMq系列01/mq_management.jpeg" alt=""></p>
+<ul>
+<li>程序也可以使用【amqp://Andy:Andy2go@localhost:5672】连接和使用 mq 提供的功能了</li>
+</ul>
+<h2 id="Amqplib"><a href="#Amqplib" class="headerlink" title="Amqplib"></a>Amqplib</h2><p>amqplib是node.js提供的一个模块，一方便node.js服务可以快速的使用RabbitMq功能。使用Amqplib会发现，RabbitMq的使用其实很简单，下面写出简单的生产者代码和消费者代码：</p>
+<p>生产者：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> amqplib = <span class="built_in">require</span>(<span class="string">'amqplib'</span>)</span><br><span class="line"><span class="keyword">const</span> promise = <span class="built_in">require</span>(<span class="string">'bluebird'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">send</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> [url, queue] = [</span><br><span class="line">    <span class="string">'amqp://Andy:Andy2go@localhost:5672'</span>,</span><br><span class="line">    <span class="string">'test.queue'</span></span><br><span class="line">  ]</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> channel = <span class="keyword">await</span> connnection.createChannel()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> channel.assertQueue(queue)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> msg = &#123;<span class="attr">name</span>: <span class="string">'Andy'</span>&#125;</span><br><span class="line">  channel.sendToQueue(queue, Buffer.from(<span class="built_in">JSON</span>.stringify(msg)))</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'send message finish: '</span>, msg)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">send().then(<span class="keyword">async</span> () =&gt; &#123;&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;&#125;)</span><br></pre></td></tr></table></figure>
+<p>消费者：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">const</span> amqplib = <span class="built_in">require</span>(<span class="string">'amqplib'</span>)</span><br><span class="line"><span class="keyword">const</span> promise = <span class="built_in">require</span>(<span class="string">'bluebird'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">send</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> [url, queue] = [</span><br><span class="line">    <span class="string">'amqp://Andy:Andy2go@localhost:5672'</span>,</span><br><span class="line">    <span class="string">'test.queue'</span></span><br><span class="line">  ]</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> channel = <span class="keyword">await</span> connnection.createChannel()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> channel.assertQueue(queue)</span><br><span class="line"></span><br><span class="line">  channel.consume(queue, msg =&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> content = <span class="built_in">JSON</span>.parse(msg.content.toString())</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'message received: '</span>, content)</span><br><span class="line">  &#125;, &#123;<span class="attr">noAck</span>: <span class="literal">true</span>&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">send().then(<span class="keyword">async</span> () =&gt; &#123;&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;&#125;)</span><br></pre></td></tr></table></figure>
+<p>下面是具体的例子运行的结果</p>
+<p><img src="/2018/08/26/JavaScript/RabbitMq系列01/mq_demo_show.jpeg" alt=""></p>
+<p>限于篇幅，本文对于MQ的介绍到此，后续会继续讲解MQ的技术细节！！！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NodeJs/" rel="tag"># NodeJs</a>
+          
+            <a href="/tags/RabbitMq/" rel="tag"># RabbitMq</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/25/其他/读仲恺辅导员戴宝文章，有感而发/" rel="next" title="读仲恺辅导员戴宝文章，有感而发">
+                <i class="fa fa-chevron-left"></i> 读仲恺辅导员戴宝文章，有感而发
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/15/JavaScript/RabbitMq系列02/" rel="prev" title="RabbitMq系列二之Amqplib库(上)">
+                RabbitMq系列二之Amqplib库(上) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Andy" />
+            
+              <p class="site-author-name" itemprop="name">Andy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#消息队列-MQ"><span class="nav-number">1.</span> <span class="nav-text">消息队列 (MQ)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MQ-是啥"><span class="nav-number">2.</span> <span class="nav-text">MQ 是啥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#例子：股票咨询功能"><span class="nav-number">2.1.</span> <span class="nav-text">例子：股票咨询功能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#V1-0"><span class="nav-number">2.1.1.</span> <span class="nav-text">V1.0</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#V2-0"><span class="nav-number">2.1.2.</span> <span class="nav-text">V2.0</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#V3-0-使用-MQ"><span class="nav-number">2.1.3.</span> <span class="nav-text">V3.0 - 使用 MQ</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例子总结"><span class="nav-number">2.1.4.</span> <span class="nav-text">例子总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MQ-架构图"><span class="nav-number">2.2.</span> <span class="nav-text">MQ 架构图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#生产者-Produce"><span class="nav-number">2.2.1.</span> <span class="nav-text">生产者(Produce)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#消费者-Consume-负责消费-MQ服务器-的消息"><span class="nav-number">2.2.2.</span> <span class="nav-text">消费者(Consume) - 负责消费 MQ服务器 的消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#交换器"><span class="nav-number">2.2.3.</span> <span class="nav-text">交换器</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MQ-使用场景分析"><span class="nav-number">3.</span> <span class="nav-text">MQ 使用场景分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MQ的历史"><span class="nav-number">3.1.</span> <span class="nav-text">MQ的历史</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AMQP"><span class="nav-number">3.1.1.</span> <span class="nav-text">AMQP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RabbitMq"><span class="nav-number">3.1.2.</span> <span class="nav-text">RabbitMq</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么时候需要-MQ"><span class="nav-number">3.2.</span> <span class="nav-text">什么时候需要 MQ</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#异步"><span class="nav-number">3.2.1.</span> <span class="nav-text">异步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解耦"><span class="nav-number">3.2.2.</span> <span class="nav-text">解耦</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#最终一致性"><span class="nav-number">3.2.3.</span> <span class="nav-text">最终一致性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#广播"><span class="nav-number">3.2.4.</span> <span class="nav-text">广播</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#错峰与流控"><span class="nav-number">3.2.5.</span> <span class="nav-text">错峰与流控</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#快速搭建一个-RabbitMq-服务器"><span class="nav-number">4.</span> <span class="nav-text">快速搭建一个 RabbitMq 服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Amqplib"><span class="nav-number">5.</span> <span class="nav-text">Amqplib</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andy</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

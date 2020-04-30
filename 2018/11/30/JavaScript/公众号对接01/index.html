@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="NodeJs,公众平台," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这段时间在流量项目做后台，流量项目需要快速迭代小功能小实验，不断尝试新玩法。对技术要求没那么高。这段时间的很多功能需要公众号作为载体，用了很多的是授权获取用户信息做其他事情，也算是闲置无聊，记下来吧 前期准备 经过ICP备案的域名 经过认证的服务号 属于自己的线上服务，使用测试号测试的时候可以本地跑的服务，使用域名生成工具生成一个临时域名指向该服务。  测试环境资源 测试公众号地址  https:">
+<meta name="keywords" content="NodeJs,公众平台">
+<meta property="og:type" content="article">
+<meta property="og:title" content="公众平台对接系列01 - 授权获取用户信息">
+<meta property="og:url" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/index.html">
+<meta property="og:site_name" content="Andy的个人博客">
+<meta property="og:description" content="这段时间在流量项目做后台，流量项目需要快速迭代小功能小实验，不断尝试新玩法。对技术要求没那么高。这段时间的很多功能需要公众号作为载体，用了很多的是授权获取用户信息做其他事情，也算是闲置无聊，记下来吧 前期准备 经过ICP备案的域名 经过认证的服务号 属于自己的线上服务，使用测试号测试的时候可以本地跑的服务，使用域名生成工具生成一个临时域名指向该服务。  测试环境资源 测试公众号地址  https:">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/WechatDebugLoginPage.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/WechatDebugLoginPage.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/ServerAddressSetting.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/AuthWechatMessageAPI.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/JsSecurityDomainSetting.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/BusinessDomainSetting.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/WebAuthDomainSetting.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/WebAuthDomainSetting.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/wechat_auth_h5page01.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/wechat_auth_h5page02.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/get_auth_code.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/get_userinfo_with_event.jpeg">
+<meta property="og:updated_time" content="2020-04-17T06:01:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="公众平台对接系列01 - 授权获取用户信息">
+<meta name="twitter:description" content="这段时间在流量项目做后台，流量项目需要快速迭代小功能小实验，不断尝试新玩法。对技术要求没那么高。这段时间的很多功能需要公众号作为载体，用了很多的是授权获取用户信息做其他事情，也算是闲置无聊，记下来吧 前期准备 经过ICP备案的域名 经过认证的服务号 属于自己的线上服务，使用测试号测试的时候可以本地跑的服务，使用域名生成工具生成一个临时域名指向该服务。  测试环境资源 测试公众号地址  https:">
+<meta name="twitter:image" content="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/WechatDebugLoginPage.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/"/>
+
+
+
+
+
+  <title>公众平台对接系列01 - 授权获取用户信息 | Andy的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andy的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/30/JavaScript/公众号对接01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andy的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">公众平台对接系列01 - 授权获取用户信息</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-30T14:41:25+08:00">
+                2018-11-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index">
+                    <span itemprop="name">JavaScript</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/NodeJs/" itemprop="url" rel="index">
+                    <span itemprop="name">NodeJs</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><em>这段时间在流量项目做后台，流量项目需要快速迭代小功能小实验，不断尝试新玩法。对技术要求没那么高。这段时间的很多功能需要公众号作为载体，用了很多的是授权获取用户信息做其他事情，也算是闲置无聊，记下来吧</em></p>
+<h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><ul>
+<li>经过ICP备案的域名</li>
+<li>经过认证的服务号</li>
+<li>属于自己的线上服务，使用测试号测试的时候可以本地跑的服务，使用域名生成工具生成一个临时域名指向该服务。</li>
+</ul>
+<h3 id="测试环境资源"><a href="#测试环境资源" class="headerlink" title="测试环境资源"></a>测试环境资源</h3><ul>
+<li>测试公众号地址</li>
+</ul>
+<p><a href="https://mp.weixin.qq.com/debug/cgi-bin/sandbox?t=sandbox/login" target="_blank" rel="noopener">https://mp.weixin.qq.com/debug/cgi-bin/sandbox?t=sandbox/login</a></p>
+<p><img src="/2018/11/30/JavaScript/公众号对接01/WechatDebugLoginPage.jpeg" style="zoom:50%;"></p>
+<p>微信扫码登录之后就拥有一个属于自己的测试号了，测试号拥有与订阅号的几乎所有功能以及服务号的部分功能，因为是测试环境，域名无需ICP备案就可以使用</p>
+<ul>
+<li>测试域名</li>
+</ul>
+<p>要去买个域名难免都会有些麻烦，测试的时候可以不用做这个麻烦的工作，当然如果你已经有域名了，甚至域名已经备案了，那事情就相当容易了，如果没有域名，我们可以使用工具临时生成一个随机域名，这个域名指向自己当前IP，并且外网可以访问。</p>
+<p>工具地址：</p>
+<p><a href="https://github.com/localtunnel/localtunnel" target="_blank" rel="noopener">https://github.com/localtunnel/localtunnel</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  my_project git clone https://github.com/localtunnel/localtunnel.git</span><br><span class="line"></span><br><span class="line">➜  localtunnel git:(master) ✗ ls</span><br><span class="line">History.md        bin               lib               package-lock.json test</span><br><span class="line">README.md         client.js         node_modules      package.json</span><br><span class="line"></span><br><span class="line">➜  localtunnel git:(master) ✗ lt --port 4001</span><br><span class="line">your url is: https://popular-mule-93.localtunnel.me</span><br></pre></td></tr></table></figure>
+<p>需要注意的是，端口4001是我们后端项目占用的端口，说白了就是我们本地应该使用<code>localhost:4001</code>访问的地址已经可以通过<code>https://popular-mule-93.localtunnel.me</code>来访问，并且外网可以访问。但是这个方式生成的临时域名肯定是未备案的，这个毋庸置疑，其次是这个域名很快就会失效，并没有具体研究失效情况，快的话10分钟，慢的话你可以使用1、2个小时。</p>
+<p>如果失效了，就再次执行命令<code>lt --port 4001</code>生成新的域名</p>
+<h2 id="公众号配置"><a href="#公众号配置" class="headerlink" title="公众号配置"></a>公众号配置</h2><h3 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h3><p>开发 -&gt; 基本配置 可以配置 <strong>公众号开发信息</strong> (包括重置AppSecret、设置IP白名单)、<strong>服务器配置</strong></p>
+<h4 id="开发者ID-AppID-和开发者密码-AppSecret"><a href="#开发者ID-AppID-和开发者密码-AppSecret" class="headerlink" title="开发者ID(AppID)和开发者密码(AppSecret)"></a>开发者ID(AppID)和开发者密码(AppSecret)</h4><p>开发者需要牢记开发者ID(AppID)和开发者密码(AppSecret)，后期开发经常会用到。测试号的开发者密码(AppSecret)不隐藏，非测试号<strong>“为保障帐号安全，公众平台不再储存AppSecret；如果遗忘，请重置”</strong></p>
+<h4 id="配置IP白名单"><a href="#配置IP白名单" class="headerlink" title="配置IP白名单"></a>配置IP白名单</h4><p><img src="/2018/11/30/JavaScript/公众号对接01/WechatDebugLoginPage.jpeg" style="zoom:50%;"></p>
+<p>为了提高公众平台开发者接口调用的安全性，避免一旦开发者ID和密码泄露后给帐号造成损失。我们对调用“<a href="https://mp.weixin.qq.com/wiki/?t=resource/res_main&amp;id=mp1421140183&amp;token=&amp;lang=zh_CN" target="_blank" rel="noopener">获取access_token</a>”接口增加IP白名单校验：只有将IP地址设置为公众号的IP白名单，才能成功调用该接口。测试号不需要设置IP白名单</p>
+<p>参考：<a href="https://mp.weixin.qq.com/cgi-bin/announce?action=getannouncement&amp;key=1495617578&amp;version=1&amp;lang=zh_CN&amp;platform=2" target="_blank" rel="noopener">https://mp.weixin.qq.com/cgi-bin/announce?action=getannouncement&amp;key=1495617578&amp;version=1&amp;lang=zh_CN&amp;platform=2</a></p>
+<p><strong>未设置白名单会报错：40164, invalid ip</strong></p>
+<h4 id="服务器配置"><a href="#服务器配置" class="headerlink" title="服务器配置"></a>服务器配置</h4><p><img src="/2018/11/30/JavaScript/公众号对接01/ServerAddressSetting.jpeg" style="zoom:50%;"></p>
+<p>可以参考：<a href="https://mp.weixin.qq.com/wiki?t=resource/res_main&amp;id=mp1421135319，连接已经讲的很详细了。" target="_blank" rel="noopener">https://mp.weixin.qq.com/wiki?t=resource/res_main&amp;id=mp1421135319，连接已经讲的很详细了。</a></p>
+<p>验证消息是否来自微信服务器主要有两个流程：</p>
+<ul>
+<li>将token、timestamp、nonce三个参数进行字典序排序</li>
+<li>将三个参数字符串拼接成一个字符串进行sha1加密</li>
+<li>开发者获得加密后的字符串可与signature对比，标识该请求来源于微信</li>
+<li>若确认此次GET请求来自微信服务器，请原样返回echostr参数内容，则接入生效，成为开发者成功，否则接入失败</li>
+</ul>
+<p>我使用nodejs做对接，以下是我的代码</p>
+<p><img src="/2018/11/30/JavaScript/公众号对接01/AuthWechatMessageAPI.jpeg" alt=""></p>
+<p>我们首先调用checkRequest方法，该方法很简单：</p>
+<ul>
+<li>将<code>token</code>(服务器配置填写的token)、接口请求参数中的<code>timestamp</code>和<code>nonce</code>参数三个参数组成一个数据，按照字典序排序后拼接成字符串</li>
+<li>将拼接后的字符串使用sha1加密(这里用到了<code>sha1</code>库)</li>
+<li>将加密后的结果字符串与<code>signature</code>参数作比较，相同则表示消息来源于微信服务器</li>
+<li>最终结果返回<code>echostr</code>参数原文，表示api已确认消息确实来源于微信服务器。所以当你发现消息不是来源于微信服务器而且你觉得应该拒绝认证，那你就不能返回<code>echostr</code>参数原文了。反过来说，如果你不care消息是否来源于微信服务器，啥都不想做又想通过认证，该api只需简单的吧<code>echostr</code>参数返回调用方即可。</li>
+</ul>
+<h3 id="JS安全域名"><a href="#JS安全域名" class="headerlink" title="JS安全域名"></a>JS安全域名</h3><p><img src="/2018/11/30/JavaScript/公众号对接01/JsSecurityDomainSetting.jpeg" style="zoom:50%;"></p>
+<p>安全域名配置过程很简单，进入<code>公众号设置</code>的<code>功能设置</code>里填写域名，这里可以填写3个安全域名，一个月可以做三个安全域名修改，所以说一个公众号一个月最多可以使用9个安全域名。</p>
+<p>配置安全域名需要下载一个TXT文件(一个包括一串字符串的普通文本文件)，并且让安全域名根路径下可以访问该文件。假如TXT文件名称为<code>MP_verify_aaa.txt</code>，域名为<code>https://abc.domain.com</code>，这里配置的时候需要填写为<code>abc.domain.com</code>，并且可以通过<code>https://abc.domain.com/MP_verify_aaa.txt</code>访问该文件。我暂时的做法是把文件放到项目静态文件目录，比如node的静态文件设置的是public文件，就放public下。</p>
+<h4 id="为啥需要设置安全域名？"><a href="#为啥需要设置安全域名？" class="headerlink" title="为啥需要设置安全域名？"></a>为啥需要设置安全域名？</h4><p>图片上说了，开发者可在域名下调用微信开发的JS接口。</p>
+<p>微信JS-SDK是微信公众平台面向网页开发者提供的基于微信内的网页开发工具包。通过使用微信JS-SDK，网页开发者可借助微信高效地使用拍照、选图、语音、位置等手机系统的能力，同时可以直接使用微信分享、扫一扫、卡券、支付等微信特有的能力，为微信用户提供更优质的网页体验。</p>
+<p>但是这个功能不是没有门槛用户可以无节操随便使用的(比如诱导分享是不允许的)，微信基于安全考虑，需要配置JSSDK安全域名，只要你页面中用到了JSSDK。</p>
+<p>发现诱导分享行为时，微信可以根据此域名追溯到所有分享出去的链接，以及通过这些链接增加的粉丝。这样，微信就可以牢牢控制了你的微信平台，一旦发现违规，让分享链接失效，删除掉诱导行为增加的粉丝，是瞬间就可以完成的(<strong>也就是地址被封</strong>)。因此，微信平台的开发者，一定要合理来使用分享功能，不要因小失大。等到你的微信平台被封，估计哭都来不及了</p>
+<p>可以参考微信JS-SDK文档：<a href="https://mp.weixin.qq.com/wiki?t=resource/res_main&amp;id=mp1421141115" target="_blank" rel="noopener">https://mp.weixin.qq.com/wiki?t=resource/res_main&amp;id=mp1421141115</a></p>
+<h3 id="业务域名"><a href="#业务域名" class="headerlink" title="业务域名"></a>业务域名</h3><p><img src="/2018/11/30/JavaScript/公众号对接01/BusinessDomainSetting.jpeg" style="zoom:50%;"></p>
+<p>配置了业务域名可以防止页面输入的时候弹出安全警告的文案影响用户体验，域名配置个数个次数与<code>JS安全域名</code>一致。也是需要下载一个TXT文件并放在域名根目录下。</p>
+<h3 id="网页授权域名"><a href="#网页授权域名" class="headerlink" title="网页授权域名"></a>网页授权域名</h3><p><img src="/2018/11/30/JavaScript/公众号对接01/WebAuthDomainSetting.jpeg" style="zoom:50%;"></p>
+<p>这是服务号有的功能，服务号可以使用网页授权获取用户微信信息(微信昵称、性别、国家省市信息、头像地址等信息)，订阅号没有该功能。</p>
+<p>配置的域名可以访问TXT文件。这里只能配置一个域名，配置的域名要跟获取<code>code</code>之后跳转的<code>redirect_uri</code>的域名一致</p>
+<p>本地使用测试号的时候可以简单使用本地局域网IP + 服务端口号即可，或者使用临时域名生成工具生成的临时域名。</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><p>业务域名、JS安全域名已经网页授权域名一般都是填写前端服务器域名。但是建议前端老域名在 nginx 做重定向到新域名，这样前后端都配置一样的域名</p>
+<p>业务域名和JS安全域名都可以配置3个，这个就可以一个后端服务同时提供给多个业务使用。但是授权域名只需配置一个，多个业务应该公用一个授权结果。</p>
+<h2 id="使用第三方NPM包快速对接微信"><a href="#使用第三方NPM包快速对接微信" class="headerlink" title="使用第三方NPM包快速对接微信"></a>使用第三方NPM包快速对接微信</h2><p><a href="https://github.com/node-webot" target="_blank" rel="noopener">https://github.com/node-webot</a></p>
+<p>GitHub上已经有很多封装微信服务API的包，我们使用这些包只需简单调用一个函数就可以完成相应的公众号操作。这里面我平时用的比较多的有：</p>
+<h3 id="co-wechat-oauth"><a href="#co-wechat-oauth" class="headerlink" title="co-wechat-oauth"></a>co-wechat-oauth</h3><p><a href="https://github.com/node-webot/co-wechat-oauth" target="_blank" rel="noopener">https://github.com/node-webot/co-wechat-oauth</a></p>
+<p>该NPM包主要用户微信授权：【OAuth授权，获取基本信息】</p>
+<h3 id="co-wechat-api"><a href="#co-wechat-api" class="headerlink" title="co-wechat-api"></a>co-wechat-api</h3><p><a href="https://github.com/node-webot/co-wechat-api" target="_blank" rel="noopener">https://github.com/node-webot/co-wechat-api</a></p>
+<p>该NPM包主要功能有：</p>
+<ul>
+<li>发送客服消息（文本、图片、语音、视频、音乐、图文）</li>
+<li>菜单操作（查询、创建、删除、个性化菜单）</li>
+<li>二维码（创建临时、永久二维码，查看二维码URL）</li>
+<li>分组操作（查询、创建、修改、移动用户到分组）</li>
+<li>用户信息（查询用户基本信息、获取关注者列表）</li>
+<li>媒体文件（上传、获取）</li>
+<li>群发消息（文本、图片、语音、视频、图文）</li>
+<li>客服记录（查询客服记录，查看客服、查看在线客服）</li>
+<li>群发消息</li>
+<li>公众号支付（发货通知、订单查询）</li>
+<li>微信小店（商品管理、库存管理、邮费模板管理、分组管理、货架管理、订单管理、功能接口）</li>
+<li>模版消息</li>
+<li>网址缩短</li>
+<li>语义查询</li>
+<li>数据分析</li>
+<li>JSSDK服务端支持</li>
+<li>素材管理</li>
+<li>摇一摇周边</li>
+</ul>
+<h2 id="网页授权获取用户信息"><a href="#网页授权获取用户信息" class="headerlink" title="网页授权获取用户信息"></a>网页授权获取用户信息</h2><p>当我们最初在公众号上操作的时候（点击菜单跳转h5），经常会弹出一个授权提示的微信页面，类似下图</p>
+<p><img src="/2018/11/30/JavaScript/公众号对接01/WebAuthDomainSetting.jpeg" style="zoom: 50%;"></p>
+<p><img src="/2018/11/30/JavaScript/公众号对接01/wechat_auth_h5page01.jpeg" style="zoom:25%;"><img src="/2018/11/30/JavaScript/公众号对接01/wechat_auth_h5page02.jpeg" style="zoom:25%;"></p>
+<p>这就是网页授权获取用户信息功能，我们个公众号要获取【用户昵称、头像、地区和性别】信息的时候需要用户手动授权，授权流程包括</p>
+<p><a href="https://mp.weixin.qq.com/wiki?action=doc&amp;id=mp1421140842&amp;t=0.9321771703718118#0" target="_blank" rel="noopener">第一步：用户同意授权，获取code</a></p>
+<p><a href="https://mp.weixin.qq.com/wiki?action=doc&amp;id=mp1421140842&amp;t=0.9321771703718118#1" target="_blank" rel="noopener">第二步：通过code换取网页授权access_token</a></p>
+<p><a href="https://mp.weixin.qq.com/wiki?action=doc&amp;id=mp1421140842&amp;t=0.9321771703718118#2" target="_blank" rel="noopener">第三步：刷新access_token（如果需要）</a></p>
+<p><a href="https://mp.weixin.qq.com/wiki?action=doc&amp;id=mp1421140842&amp;t=0.9321771703718118#3" target="_blank" rel="noopener">第四步：拉取用户信息(需scope为 snsapi_userinfo)</a></p>
+<p><a href="https://mp.weixin.qq.com/wiki?action=doc&amp;id=mp1421140842&amp;t=0.9321771703718118#4" target="_blank" rel="noopener">附：检验授权凭证（access_token）是否有效</a></p>
+<h3 id="不需要用户手动授权的网页授权"><a href="#不需要用户手动授权的网页授权" class="headerlink" title="不需要用户手动授权的网页授权"></a>不需要用户手动授权的网页授权</h3><p>网页授权有两种类型</p>
+<ul>
+<li>只获取用户的openid，不需要用户手动授权</li>
+</ul>
+<p>也就是说用户是无感知的，对应的scope参数为【snsapi_base】</p>
+<ul>
+<li>另一种除了获取openid，还获取用户更多的信息，这种网页授权需要用户手动授权。</li>
+</ul>
+<p>对应的scope参数为【snsapi_userinfo】</p>
+<h3 id="获取code"><a href="#获取code" class="headerlink" title="获取code"></a>获取code</h3><p>前端页面【<a href="https://frontend.com/page/auth】访问连接：" target="_blank" rel="noopener">https://frontend.com/page/auth】访问连接：</a></p>
+<p><a href="https://open.weixin.qq.com/connect/oauth2/authorize" target="_blank" rel="noopener">https://open.weixin.qq.com/connect/oauth2/authorize</a>?</p>
+<p>​    appid=wxxxxxxxxxx53&amp;</p>
+<p>​    redirect_uri=<a href="https://frontend.com/page/auth&amp;" target="_blank" rel="noopener">https://frontend.com/page/auth&amp;</a></p>
+<p>​    response_type=code&amp;</p>
+<p>​    scope=【snsapi_base || snsapi_userinfo】</p>
+<p>注意<code>redirect_uri</code>参数的域名也网页授权域名配置的域名必须是一致的。前端访问这一地址，如果scope为snsapi_userinfo就会弹出授权页面给用户授权，授权之后会跳转页面带上code参数【<a href="https://frontend.com/page/auth&amp;code=xxxxxxxx】，注意code参数我们需要用到的。" target="_blank" rel="noopener">https://frontend.com/page/auth&amp;code=xxxxxxxx】，注意code参数我们需要用到的。</a></p>
+<p><em>我不会前端，本地测试的时候为了能顺利拿到code，我在网页授权接口域名配置里配置了后台域名，并且这里的redirect_uri参数也用了后台服务的一个地址，所以我直接看后台的log就可以拿到code了，【测试号网页授权域名配置可以配置本地局域网IP+端口】</em></p>
+<p><img src="/2018/11/30/JavaScript/公众号对接01/get_auth_code.jpeg" alt=""></p>
+<p><strong>注意code只能用一次，不能重复使用</strong></p>
+<h3 id="根据code获取access-token"><a href="#根据code获取access-token" class="headerlink" title="根据code获取access_token"></a>根据code获取access_token</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> OAuth = <span class="built_in">require</span>(<span class="string">'co-wechat-oauth'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GetAccessTokenService</span> </span>&#123;</span><br><span class="line">  <span class="keyword">async</span> perform (code) &#123;</span><br><span class="line">      <span class="keyword">const</span> client = <span class="keyword">new</span> OAuth(<span class="string">'appid'</span>, <span class="string">'appsecret'</span>)</span><br><span class="line">      <span class="keyword">const</span> res = <span class="keyword">await</span> client.getAccessToken(code)</span><br><span class="line">      <span class="built_in">console</span>.log(res)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = GetAccessTokenService</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">AccessToken &#123;</span></span><br><span class="line"><span class="comment">  data:</span></span><br><span class="line"><span class="comment">   &#123; access_token: 'xxxxxx',</span></span><br><span class="line"><span class="comment">     expires_in: 7200,</span></span><br><span class="line"><span class="comment">     refresh_token: 'xxxxxxx',</span></span><br><span class="line"><span class="comment">     openid: 'oxtxxxxxxp58w',</span></span><br><span class="line"><span class="comment">     scope: 'snsapi_userinfo',</span></span><br><span class="line"><span class="comment">     create_at: 1544850832033 &#125; &#125;</span></span><br><span class="line"><span class="comment">     </span></span><br><span class="line"><span class="comment">AccessToken &#123;</span></span><br><span class="line"><span class="comment">  data:</span></span><br><span class="line"><span class="comment">   &#123; access_token: 'xxxxxx',</span></span><br><span class="line"><span class="comment">     expires_in: 7200,</span></span><br><span class="line"><span class="comment">     refresh_token: 'xxxxx',</span></span><br><span class="line"><span class="comment">     openid: 'oxtxxxxxxxxp58w',</span></span><br><span class="line"><span class="comment">     scope: 'snsapi_base',</span></span><br><span class="line"><span class="comment">     create_at: 1544858626163 &#125; &#125;</span></span><br><span class="line"><span class="comment">**/</span></span><br></pre></td></tr></table></figure>
+<p>从打印出来的日志看出，无论scope取那个值，获取access_token返回的数据都是一样的，即包括【openid和access_token】具体他们的差别是获取其他信息</p>
+<h3 id="拉取用户信息"><a href="#拉取用户信息" class="headerlink" title="拉取用户信息"></a>拉取用户信息</h3><p>继上一步得到的access_token，我们可以使用它进一步获取用户的其他信息，前提要求授权方式为【snsapi_userinfo】</p>
+<p>我们细细看【co-wechat-oauth】包和【co-wechat-api】包的api，会发现他们都有获取用户信息的方法【getUser】，但是返回的结果不一样，甚至数据也不完全一致。至于关注公众号后授权和关注公众号前授权，数据是一样的，微信对授权不强求用户必须关注了公众号才能授权</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> OAuth = <span class="built_in">require</span>(<span class="string">'co-wechat-oauth'</span>)</span><br><span class="line"><span class="keyword">const</span> OApi = <span class="built_in">require</span>(<span class="string">'co-wechat-api'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GetUserInfoService</span> <span class="keyword">extends</span> <span class="title">BaseService</span> </span>&#123;</span><br><span class="line">  <span class="keyword">async</span> perform (code) &#123;</span><br><span class="line">    <span class="keyword">const</span> secret = <span class="keyword">await</span> <span class="keyword">this</span>.appSecret()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> client = <span class="keyword">new</span> OAuth(<span class="string">'appid'</span>, <span class="string">'appsecret'</span>)</span><br><span class="line">    <span class="keyword">const</span> apiClient = <span class="keyword">new</span> OApi(<span class="string">'appid'</span>, <span class="string">'appsecret'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取 openid 和 accessToken</span></span><br><span class="line">    <span class="keyword">const</span> token = <span class="keyword">await</span> client.getAccessToken(<span class="keyword">this</span>.options.code)</span><br><span class="line">    <span class="keyword">const</span> openid = token.data.openid</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 同步获取用户信息</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> userInfoTmp = <span class="keyword">await</span> client.getUser(openid)</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">'get user by oauth'</span>, userInfoTmp)</span><br><span class="line">      result.userInfoTmp = userInfoTmp</span><br><span class="line">    &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">      <span class="built_in">console</span>.log(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> userInfo = <span class="keyword">await</span> apiClient.getUser(&#123;openid, <span class="attr">lang</span>: <span class="string">'zh_CN'</span>&#125;)</span><br><span class="line">      result.userInfo = userInfo</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">'get user by api'</span>, userInfo)</span><br><span class="line">    &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">      <span class="built_in">console</span>.log(err)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = GetUserInfoService</span><br></pre></td></tr></table></figure>
+<p>测试号需要关注了才能测试授权获取用户信息，对于未关注公众号又强制授权会出现什么情况只能用真实的服务号来测试。下面是代码执行后测试号和服务号各个情况打印的结果</p>
+<ul>
+<li>测试号 - 授权【snsapi_base】</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">get user by oauth: &#123; </span><br><span class="line">	WeChatAPIError: api unauthorized,</span><br><span class="line">	hints: [ req_id: iCRHza0720hb91 ]</span><br><span class="line">    name: &apos;WeChatAPIError&apos;,</span><br><span class="line">    code: 48001</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">get user by api: &#123;</span><br><span class="line">  subscribe: 1, // 是否关注[0: 否, 1: 是]</span><br><span class="line">  openid: &apos;xxx&apos;,</span><br><span class="line">  nickname: &apos;Andy&apos;,</span><br><span class="line">  sex: 0,</span><br><span class="line">  language: &apos;zh_CN&apos;,</span><br><span class="line">  city: &apos;&apos;,</span><br><span class="line">  province: &apos;&apos;,</span><br><span class="line">  country: &apos;&apos;,</span><br><span class="line">  headimgurl: &apos;http://thirdwx.qlogo.cn/mmopen/xxx/132&apos;,</span><br><span class="line">  subscribe_time: 1544862390,</span><br><span class="line">  remark: &apos;&apos;,</span><br><span class="line">  groupid: 0,</span><br><span class="line">  tagid_list: [],</span><br><span class="line">  subscribe_scene: &apos;ADD_SCENE_QR_CODE&apos;,</span><br><span class="line">  qr_scene: 0,</span><br><span class="line">  qr_scene_str: &apos;&apos;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>测试号 - 授权【snsapi_userinfo】</li>
+</ul>
+<p>授权后，两个方法得到的结果不一致，头像图片是一样的，但是地址不一致</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;openid&quot;: &quot;xxx&quot;,</span><br><span class="line">    &quot;nickname&quot;: &quot;Andy&quot;,</span><br><span class="line">    &quot;sex&quot;: 0,</span><br><span class="line">    &quot;language&quot;: &quot;zh_CN&quot;,</span><br><span class="line">    &quot;city&quot;: &quot;&quot;,</span><br><span class="line">    &quot;province&quot;: &quot;&quot;,</span><br><span class="line">    &quot;country&quot;: &quot;&quot;,</span><br><span class="line">    &quot;headimgurl&quot;: &quot;http://thirdwx.qlogo.cn/mmopen/vi_32/xxx/132&quot;,</span><br><span class="line">    &quot;privilege&quot;: []</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;subscribe&quot;: 1,</span><br><span class="line">    &quot;openid&quot;: &quot;xxx&quot;,</span><br><span class="line">    &quot;nickname&quot;: &quot;Andy&quot;,</span><br><span class="line">    &quot;sex&quot;: 1,</span><br><span class="line">    &quot;language&quot;: &quot;zh_CN&quot;,</span><br><span class="line">    &quot;city&quot;: &quot;广州&quot;,</span><br><span class="line">    &quot;province&quot;: &quot;广东&quot;,</span><br><span class="line">    &quot;country&quot;: &quot;中国&quot;,</span><br><span class="line">    &quot;headimgurl&quot;: &quot;http://thirdwx.qlogo.cn/mmopen/xxx/132&quot;,</span><br><span class="line">    &quot;subscribe_time&quot;: 1544863801,</span><br><span class="line">    &quot;remark&quot;: &quot;&quot;,</span><br><span class="line">    &quot;groupid&quot;: 0,</span><br><span class="line">    &quot;tagid_list&quot;: [],</span><br><span class="line">    &quot;subscribe_scene&quot;: &quot;ADD_SCENE_SEARCH&quot;,</span><br><span class="line">    &quot;qr_scene&quot;: 0,</span><br><span class="line">    &quot;qr_scene_str&quot;: &quot;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>服务号 - 未关注授权【snsapi_base】</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;name&quot;: &quot;WeChatAPIError&quot;,</span><br><span class="line">    &quot;code&quot;: 48001</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;subscribe&quot;: 0,</span><br><span class="line">    &quot;openid&quot;: &quot;xxx&quot;,</span><br><span class="line">    &quot;tagid_list&quot;: []</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>服务号 - 关注授权【snsapi_base】</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;name&quot;: &quot;WeChatAPIError&quot;,</span><br><span class="line">    &quot;code&quot;: 48001</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;subscribe&quot;: 1,</span><br><span class="line">    &quot;openid&quot;: &quot;xxx&quot;,</span><br><span class="line">    &quot;nickname&quot;: &quot;Andy&quot;,</span><br><span class="line">    &quot;sex&quot;: 1,</span><br><span class="line">    &quot;language&quot;: &quot;zh_CN&quot;,</span><br><span class="line">    &quot;city&quot;: &quot;广州&quot;,</span><br><span class="line">    &quot;province&quot;: &quot;广东&quot;,</span><br><span class="line">    &quot;country&quot;: &quot;中国&quot;,</span><br><span class="line">    &quot;headimgurl&quot;: &quot;http://thirdwx.qlogo.cn/mmopen/xxx/132&quot;,</span><br><span class="line">    &quot;subscribe_time&quot;: 1544863801,</span><br><span class="line">    &quot;remark&quot;: &quot;&quot;,</span><br><span class="line">    &quot;groupid&quot;: 0,</span><br><span class="line">    &quot;tagid_list&quot;: [],</span><br><span class="line">    &quot;subscribe_scene&quot;: &quot;ADD_SCENE_SEARCH&quot;,</span><br><span class="line">    &quot;qr_scene&quot;: 0,</span><br><span class="line">    &quot;qr_scene_str&quot;: &quot;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>服务号 - 未关注授权【snsapi_userinfo】</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;openid&quot;: &quot;xxx&quot;,</span><br><span class="line">    &quot;nickname&quot;: &quot;Andy&quot;,</span><br><span class="line">    &quot;sex&quot;: 0,</span><br><span class="line">    &quot;language&quot;: &quot;zh_CN&quot;,</span><br><span class="line">    &quot;city&quot;: &quot;&quot;,</span><br><span class="line">    &quot;province&quot;: &quot;&quot;,</span><br><span class="line">    &quot;country&quot;: &quot;&quot;,</span><br><span class="line">    &quot;headimgurl&quot;: &quot;http://thirdwx.qlogo.cn/mmopen/vi_32/xxx/132&quot;,</span><br><span class="line">    &quot;privilege&quot;: []</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;subscribe&quot;: 0,</span><br><span class="line">    &quot;openid&quot;: &quot;xxx&quot;,</span><br><span class="line">    &quot;tagid_list&quot;: []</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>服务号 - 关注授权【snsapi_userinfo】</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;openid&quot;: &quot;xxx&quot;,</span><br><span class="line">    &quot;nickname&quot;: &quot;Andy&quot;,</span><br><span class="line">    &quot;sex&quot;: 0,</span><br><span class="line">    &quot;language&quot;: &quot;zh_CN&quot;,</span><br><span class="line">    &quot;city&quot;: &quot;&quot;,</span><br><span class="line">    &quot;province&quot;: &quot;&quot;,</span><br><span class="line">    &quot;country&quot;: &quot;&quot;,</span><br><span class="line">    &quot;headimgurl&quot;: &quot;http://thirdwx.qlogo.cn/mmopen/vi_32/xxx/132&quot;,</span><br><span class="line">    &quot;privilege&quot;: []</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;subscribe&quot;: 1,</span><br><span class="line">    &quot;openid&quot;: &quot;xxx&quot;,</span><br><span class="line">    &quot;nickname&quot;: &quot;Andy&quot;,</span><br><span class="line">    &quot;sex&quot;: 0,</span><br><span class="line">    &quot;language&quot;: &quot;zh_CN&quot;,</span><br><span class="line">    &quot;city&quot;: &quot;&quot;,</span><br><span class="line">    &quot;province&quot;: &quot;&quot;,</span><br><span class="line">    &quot;country&quot;: &quot;&quot;,</span><br><span class="line">    &quot;headimgurl&quot;: &quot;http://thirdwx.qlogo.cn/mmopen/xxx/132&quot;,</span><br><span class="line">    &quot;subscribe_time&quot;: 1544862113,</span><br><span class="line">    &quot;remark&quot;: &quot;&quot;,</span><br><span class="line">    &quot;groupid&quot;: 0,</span><br><span class="line">    &quot;tagid_list&quot;: [],</span><br><span class="line">    &quot;subscribe_scene&quot;: &quot;ADD_SCENE_SEARCH&quot;,</span><br><span class="line">    &quot;qr_scene&quot;: 0,</span><br><span class="line">    &quot;qr_scene_str&quot;: &quot;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="订阅号获取用户信息"><a href="#订阅号获取用户信息" class="headerlink" title="订阅号获取用户信息"></a>订阅号获取用户信息</h2><p>熟悉订阅号的人应该清楚订阅号是不能接开发的，我们是无法使用网页授权获取用户信息的，但是我们可以通过其他方法同样得到用户信息。</p>
+<p>这里需要讲下网页授权获取用户信息有什么好处，网页授权获取用户信息是在我们的服务器端触发的，也就是在我们h5页面中触发的，既然是在我们的页面，我们就可以知道这个用户是谁，也就是用户的userId，这样我们就可以将userId绑定微信的用户信息。</p>
+<p>那么订阅号怎么获取用户信息呢，这个需要用户主动与我们公众号交互，比如关注，发消息等，这些交互都会形成一个事件，我们可以通过这些事件进一步得到用户信息</p>
+<h3 id="基本配置-1"><a href="#基本配置-1" class="headerlink" title="基本配置"></a>基本配置</h3><p>订阅号跟服务号一样，需要配置服务器端地址和JS安全域名，流程跟服务号一样</p>
+<p>假如我们配置了服务端地址：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">服务器地址(URL)</span><br><span class="line">https://host/wechat/api/v1/auth/receiveApi</span><br><span class="line"></span><br><span class="line">令牌(Token)</span><br><span class="line">token</span><br><span class="line"></span><br><span class="line">消息加解密密钥(EncodingAESKey)</span><br><span class="line">xxx</span><br></pre></td></tr></table></figure>
+<p>【<a href="https://host/wechat/api/v1/auth/receiveApi】地址是我们的服务器的一个get请求地址，做微信服务器信息校验，前面已经讲过，这里我们对这个相同的地址也要写一个post方法的接口实现，这个接口用于接受用户操作事件的。" target="_blank" rel="noopener">https://host/wechat/api/v1/auth/receiveApi】地址是我们的服务器的一个get请求地址，做微信服务器信息校验，前面已经讲过，这里我们对这个相同的地址也要写一个post方法的接口实现，这个接口用于接受用户操作事件的。</a></p>
+<p>下面是我的实现：</p>
+<p><img src="/2018/11/30/JavaScript/公众号对接01/get_userinfo_with_event.jpeg" alt=""></p>
+<p>注意接口最终返回了’success’字符串【this.body = ‘success’】，这里是有讲究的，返回内容不能包含空格等等，我开始返回一句话，导致公众号一致报错</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">微信服务号被动回复消息：该公众号提供的服务出现故障，请稍后再试</span><br></pre></td></tr></table></figure>
+<p><strong>情况1：你的接口返回值里面有空格</strong></p>
+<p>当前我就是这个原因，所以我直接返回了空字符串</p>
+<p><strong>情况2：接口返回值的字段取值不对</strong></p>
+<p><strong>情况3：xml返回值的节点名不对</strong></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NodeJs/" rel="tag"># NodeJs</a>
+          
+            <a href="/tags/公众平台/" rel="tag"># 公众平台</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/23/JavaScript/RabbitMq系列04/" rel="next" title="RabbitMq系列四之Amqplib库(下)">
+                <i class="fa fa-chevron-left"></i> RabbitMq系列四之Amqplib库(下)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/07/JavaScript/公众号对接02/" rel="prev" title="公众平台对接系列02 - 小程序后端对接">
+                公众平台对接系列02 - 小程序后端对接 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Andy" />
+            
+              <p class="site-author-name" itemprop="name">Andy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前期准备"><span class="nav-number">1.</span> <span class="nav-text">前期准备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#测试环境资源"><span class="nav-number">1.1.</span> <span class="nav-text">测试环境资源</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#公众号配置"><span class="nav-number">2.</span> <span class="nav-text">公众号配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本配置"><span class="nav-number">2.1.</span> <span class="nav-text">基本配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#开发者ID-AppID-和开发者密码-AppSecret"><span class="nav-number">2.1.1.</span> <span class="nav-text">开发者ID(AppID)和开发者密码(AppSecret)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置IP白名单"><span class="nav-number">2.1.2.</span> <span class="nav-text">配置IP白名单</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务器配置"><span class="nav-number">2.1.3.</span> <span class="nav-text">服务器配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JS安全域名"><span class="nav-number">2.2.</span> <span class="nav-text">JS安全域名</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为啥需要设置安全域名？"><span class="nav-number">2.2.1.</span> <span class="nav-text">为啥需要设置安全域名？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#业务域名"><span class="nav-number">2.3.</span> <span class="nav-text">业务域名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网页授权域名"><span class="nav-number">2.4.</span> <span class="nav-text">网页授权域名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注意事项"><span class="nav-number">2.5.</span> <span class="nav-text">注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用第三方NPM包快速对接微信"><span class="nav-number">3.</span> <span class="nav-text">使用第三方NPM包快速对接微信</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#co-wechat-oauth"><span class="nav-number">3.1.</span> <span class="nav-text">co-wechat-oauth</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#co-wechat-api"><span class="nav-number">3.2.</span> <span class="nav-text">co-wechat-api</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网页授权获取用户信息"><span class="nav-number">4.</span> <span class="nav-text">网页授权获取用户信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不需要用户手动授权的网页授权"><span class="nav-number">4.1.</span> <span class="nav-text">不需要用户手动授权的网页授权</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取code"><span class="nav-number">4.2.</span> <span class="nav-text">获取code</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#根据code获取access-token"><span class="nav-number">4.3.</span> <span class="nav-text">根据code获取access_token</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#拉取用户信息"><span class="nav-number">4.4.</span> <span class="nav-text">拉取用户信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#订阅号获取用户信息"><span class="nav-number">5.</span> <span class="nav-text">订阅号获取用户信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本配置-1"><span class="nav-number">5.1.</span> <span class="nav-text">基本配置</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andy</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

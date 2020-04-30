@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="NodeJs,RabbitMq," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="回顾在前面一篇中，我们讲到了以下内容  连接RabbitMq 创建信道 声明队列 声明交换器 队列绑定交换器  建议去看前一篇文章先对这些内容有个了解 交互时序图 生产者发送消息当交换器和队列已经声明完毕，我们就可以准备发送消息了。amqplib提供了publish和sendToQueue两个方法可以发送消息，两个方法中sendToQueue简单的将消息发送给指定的队列(经过默认交换器)，publ">
+<meta name="keywords" content="NodeJs,RabbitMq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMq系列三之Amqplib库(中)">
+<meta property="og:url" content="http://yoursite.com/2018/09/22/JavaScript/RabbitMq系列03/index.html">
+<meta property="og:site_name" content="Andy的个人博客">
+<meta property="og:description" content="回顾在前面一篇中，我们讲到了以下内容  连接RabbitMq 创建信道 声明队列 声明交换器 队列绑定交换器  建议去看前一篇文章先对这些内容有个了解 交互时序图 生产者发送消息当交换器和队列已经声明完毕，我们就可以准备发送消息了。amqplib提供了publish和sendToQueue两个方法可以发送消息，两个方法中sendToQueue简单的将消息发送给指定的队列(经过默认交换器)，publ">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/09/22/JavaScript/RabbitMq系列03/sequence_diagram.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/22/JavaScript/RabbitMq系列03/node-rabbitmq-series-03/queues_msg_unacked.jpeg">
+<meta property="og:updated_time" content="2020-04-17T06:01:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RabbitMq系列三之Amqplib库(中)">
+<meta name="twitter:description" content="回顾在前面一篇中，我们讲到了以下内容  连接RabbitMq 创建信道 声明队列 声明交换器 队列绑定交换器  建议去看前一篇文章先对这些内容有个了解 交互时序图 生产者发送消息当交换器和队列已经声明完毕，我们就可以准备发送消息了。amqplib提供了publish和sendToQueue两个方法可以发送消息，两个方法中sendToQueue简单的将消息发送给指定的队列(经过默认交换器)，publ">
+<meta name="twitter:image" content="http://yoursite.com/2018/09/22/JavaScript/RabbitMq系列03/sequence_diagram.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/09/22/JavaScript/RabbitMq系列03/"/>
+
+
+
+
+
+  <title>RabbitMq系列三之Amqplib库(中) | Andy的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andy的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/22/JavaScript/RabbitMq系列03/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andy的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">RabbitMq系列三之Amqplib库(中)</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-22T23:43:09+08:00">
+                2018-09-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index">
+                    <span itemprop="name">JavaScript</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/NodeJs/" itemprop="url" rel="index">
+                    <span itemprop="name">NodeJs</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h2><p>在前面一篇中，我们讲到了以下内容</p>
+<ul>
+<li>连接RabbitMq</li>
+<li>创建信道</li>
+<li>声明队列</li>
+<li>声明交换器</li>
+<li>队列绑定交换器</li>
+</ul>
+<p>建议去看前一篇文章先对这些内容有个了解</p>
+<h2 id="交互时序图"><a href="#交互时序图" class="headerlink" title="交互时序图"></a>交互时序图</h2><p><img src="/2018/09/22/JavaScript/RabbitMq系列03/sequence_diagram.jpeg" alt=""></p>
+<h2 id="生产者发送消息"><a href="#生产者发送消息" class="headerlink" title="生产者发送消息"></a>生产者发送消息</h2><p>当交换器和队列已经声明完毕，我们就可以准备发送消息了。amqplib提供了publish和sendToQueue两个方法可以发送消息，两个方法中sendToQueue简单的将消息发送给指定的队列(经过默认交换器)，publish则是根据路由键将消息发送到指定的交换器。两个方法表面形式上有所区别，但是消息路由过程以及参数都是一样的。</p>
+<h3 id="sendToQueue-queue-msg-options"><a href="#sendToQueue-queue-msg-options" class="headerlink" title="sendToQueue(queue, msg, options)"></a>sendToQueue(queue, msg, options)</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> queue = <span class="string">'test_queue'</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue, &#123;<span class="attr">durable</span>: <span class="literal">true</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> msg = Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy'</span>&#125;))</span><br><span class="line"><span class="keyword">const</span> r = <span class="keyword">await</span> channel.sendToQueue(queue, msg, &#123;<span class="attr">durable</span>: <span class="literal">true</span>&#125;)</span><br><span class="line"><span class="comment">// r: true</span></span><br></pre></td></tr></table></figure>
+<p>发送过程很简单，queue参数是队列名称，msg是消息体的buffer对象，options参数是消息的设置参数</p>
+<h4 id="options常用参数："><a href="#options常用参数：" class="headerlink" title="options常用参数："></a>options常用参数：</h4><ul>
+<li>expiration (字符串 | 数字)</li>
+</ul>
+<p>消息超时时间，一旦消息超过某个时间没有被消费就会被删除。规范中，这是一个字符串；这里提供的数字将被强制转换为字符串。</p>
+<ul>
+<li>priority (正整数)</li>
+</ul>
+<p>消息的优先级。</p>
+<ul>
+<li>deliveryMod  (布尔型或数值型)</li>
+</ul>
+<p>或者 <strong>1</strong> / <strong>false</strong>，意思是非持久的; 或者 <strong>2</strong> / <strong>true</strong>，意思是持久的</p>
+<ul>
+<li>replyT  (字符串)</li>
+</ul>
+<p>通常用于在RPC方案中命名接收应用程序必须向其发送回复的队列</p>
+<h3 id="publish-exchange-routingKey-msg-options"><a href="#publish-exchange-routingKey-msg-options" class="headerlink" title="publish(exchange, routingKey, msg, options)"></a>publish(exchange, routingKey, msg, options)</h3><p>前三个参数很容易知道，exchange参数是交换器名称，routingKey参数是路由键，msg参数是消息体的Buffer，options参数跟sendToQueue方法是一样的</p>
+<p><strong>注意：消息可以使用deliveryMod参数设置为持久化，也就是即使RabbitMq重启，消息也不会丢失。但是这个功能依赖于队列的持久化，也就是要想消息持久化，队列声明的时候也应该设置为持久化。这个也很容易理解，队列如果不是持久化的，RabbitMq重启，队列都消失了，消息自然也就丢失了</strong></p>
+<h3 id="生产者发送确认模式"><a href="#生产者发送确认模式" class="headerlink" title="生产者发送确认模式"></a>生产者发送确认模式</h3><p>RabbitMq的消息传递代理的系统是分布式的，发送方不能保证消息发送成功甚至被对方成功处理(针对能否被成功处理RabbitMq支持了RPC模式)，因此生产者和消费者都需要一种交互和处理确认的机制。</p>
+<p>那生产者怎么知道消息已经成功发送了呢，amqplib提供了confirmChannel来实现这个功能</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> amqplib = <span class="built_in">require</span>(<span class="string">'amqplib'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">send</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> [url, queue] = [</span><br><span class="line">    <span class="string">'amqp://andy:andy2go@localhost:5672'</span>,</span><br><span class="line">    <span class="string">'andy.test'</span></span><br><span class="line">  ]</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line">  <span class="keyword">const</span> channel = <span class="keyword">await</span> connnection.createConfirmChannel()</span><br><span class="line">  <span class="keyword">await</span> channel.assertQueue(queue)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> [length, total] = [<span class="number">1</span>, <span class="number">1000</span> * <span class="number">100</span></span><br><span class="line">  <span class="keyword">while</span> (length &lt;= total) &#123;</span><br><span class="line">    channel.sendToQueue(<span class="string">'not_exists_queue'</span>, <span class="keyword">new</span> Buffer(<span class="string">'blah'</span>), &#123;&#125;, (err, ok) =&gt; &#123;</span><br><span class="line">      <span class="keyword">if</span> (err !== <span class="literal">null</span>) <span class="built_in">console</span>.error(<span class="string">'Message send failed!'</span>)</span><br><span class="line">      <span class="keyword">else</span> <span class="built_in">console</span>.log(<span class="string">'Message send confirmed'</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">    length += <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">await</span> channel.waitForConfirms()</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'All messages done'</span>)</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">send().then(<span class="keyword">async</span> () =&gt; &#123;&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;&#125;)</span><br></pre></td></tr></table></figure>
+<p>我们尝试发送10万条消息到队列，但是我们选择了一个不存在的队列。我们发现消息还是正常发送并且被确认了。看起来像是消息确认不真正确保消息一定是入了队列，即使消息进入黑洞，也表示正常发送。文档的说明方法就是判断发送回调的err是否为null，为null表示消息成功，然后确认打印消息已经确认。</p>
+<p>但是我发送这10条消息需要20多秒钟的时间，等20多秒钟结束之后(消息全部发送给了RabbitMq)，才执行<code>All messages done</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  andy_amqplib node src/send_confirm/send.js</span><br><span class="line">....</span><br><span class="line">Message send confirmed</span><br><span class="line">....</span><br><span class="line">All messages done</span><br></pre></td></tr></table></figure>
+<h2 id="消费者监听队列，消费消息"><a href="#消费者监听队列，消费消息" class="headerlink" title="消费者监听队列，消费消息"></a>消费者监听队列，消费消息</h2><p>消费者有两个形式可以消费队列的消息：<strong>推模式</strong> 和 <strong>拉模式</strong>。堆模式采用 Basic.Consume 进行消费，拉模式采用 Basic.Get 进行消费</p>
+<h3 id="推模式"><a href="#推模式" class="headerlink" title="推模式"></a>推模式</h3><p>推模式，消费者监听队列，每当队列有消息就会推送给消费者消费。消费者需要做的是监听，写好消费消息的逻辑</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">handle</span> (<span class="params">msg</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> content = <span class="built_in">JSON</span>.parse(msg.content.toString()) <span class="comment">// 消息体</span></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'message received: '</span>, content)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">channel.consume(queue, handle, &#123;<span class="attr">noAck</span>: <span class="literal">true</span>&#125;)</span><br></pre></td></tr></table></figure>
+<h4 id="options参数"><a href="#options参数" class="headerlink" title="options参数:"></a>options参数:</h4><ul>
+<li>consumerTag  (string)</li>
+</ul>
+<p>RabbitMq 用这个名称参数区分消息传递的消费者，他不能再信道中使用。这个经常被忽略，这时 RabbitMq 会创建一个随机的名称</p>
+<ul>
+<li>noAck  (boolean)</li>
+</ul>
+<p>消息确认方式，如果为 true，当消息发送给消费者之后 RabbitMq 就会将它从队列中移除，而不会等待消费者处理完后告诉 RabbitMq。默认是 false</p>
+<p><strong>很明显如果设置为true，是可以提高 RabbitMq 性能的，毕竟 RabbitMq 只管将消息轮询 (消息按数量平摊给消费者们，如当前有6条消息和两个消费者，1、3、5条消息会发给先监听队列的消费者；2、4、6条消息发给后监听的消费者) 地发送出去</strong></p>
+<p>很多情况下我们不能将它设置为 true。首先消息发送给消费者之后自动出队，如果这个时候消费者窘机了，消息也就找不回了；然后设置为 true，prefetch 并发就没效果了 (下面的消息确认会讲到这个)</p>
+<ul>
+<li>priority  (integer)</li>
+</ul>
+<p>给予消费者优先权; 较高优先级的消费者优先于较低优先级的消费者获得消息</p>
+<h3 id="拉模式"><a href="#拉模式" class="headerlink" title="拉模式"></a>拉模式</h3><p>拉模式，消费者主动从队列请求一个消息</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> msg = <span class="keyword">await</span> channel.get(queue, &#123;<span class="attr">noAck</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"><span class="built_in">console</span>.log(msg)</span><br></pre></td></tr></table></figure>
+<p>正常情况下，当队列queue里面存在待消费的消息的时候能够正常得到消息(如下图)，但是当队列不存在待消费的消息，返回false</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&#123; fields:</span><br><span class="line">   &#123; deliveryTag: 1,</span><br><span class="line">     redelivered: false,</span><br><span class="line">     exchange: '',</span><br><span class="line">     routingKey: 'andy.test',</span><br><span class="line">     messageCount: 0 &#125;,</span><br><span class="line">  properties:</span><br><span class="line">   &#123; contentType: undefined,</span><br><span class="line">     contentEncoding: undefined,</span><br><span class="line">     headers: &#123;&#125;,</span><br><span class="line">     deliveryMode: undefined,</span><br><span class="line">     priority: undefined,</span><br><span class="line">     correlationId: undefined,</span><br><span class="line">     replyTo: undefined,</span><br><span class="line">     expiration: undefined,</span><br><span class="line">     messageId: undefined,</span><br><span class="line">     timestamp: undefined,</span><br><span class="line">     type: undefined,</span><br><span class="line">     userId: undefined,</span><br><span class="line">     appId: undefined,</span><br><span class="line">     clusterId: undefined &#125;,</span><br><span class="line">  content: &lt;Buffer 7b 22 6e 61 6d 65 22 3a 22 41 6e 64 79 22 7d&gt; &#125;</span><br></pre></td></tr></table></figure>
+<p>当队列queue不存在的时候，会报错</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Error: Channel closed by server: 404 (NOT-FOUND) with message "NOT_FOUND - no queue 'queue' in vhost '/'"</span><br><span class="line">    at Channel.C.accept (/Users/andy/git/my_project/rabbitmq/andy_amqplib/node_modules/_amqplib@0.4.2@amqplib/lib/channel.js:406:17)</span><br><span class="line">    at Connection.mainAccept [as accept] (/Users/andy/git/my_project/rabbitmq/andy_amqplib/node_modules/_amqplib@0.4.2@amqplib/lib/connection.js:63:33)</span><br><span class="line">    at Socket.go (/Users/andy/git/my_project/rabbitmq/andy_amqplib/node_modules/_amqplib@0.4.2@amqplib/lib/connection.js:476:48)</span><br><span class="line">    at emitNone (events.js:106:13)</span><br><span class="line">    at Socket.emit (events.js:208:7)</span><br><span class="line">    at emitReadable_ (_stream_readable.js:513:10)</span><br><span class="line">    at emitReadable (_stream_readable.js:507:7)</span><br><span class="line">    at addChunk (_stream_readable.js:274:7)</span><br><span class="line">    at readableAddChunk (_stream_readable.js:250:11)</span><br><span class="line">    at Socket.Readable.push (_stream_readable.js:208:10)</span><br><span class="line">    at TCP.onread (net.js:607:20)</span><br></pre></td></tr></table></figure>
+<p>这个拉模式的options参数只有一个参数: noAck，含义与推模式的 noAck 一样</p>
+<h3 id="消息确认"><a href="#消息确认" class="headerlink" title="消息确认"></a>消息确认</h3><p>RabbitMq 怎么决定一个消息已经被正常处理了呢？这就是消息声明周期的最后一步：<strong>消息确认</strong>。消息一旦被确认，RabbitMq就会知道这个消息已经被正常处理，然后将消息从队列移除。</p>
+<p>前面的推拉模式，我们都显示添加了options参数： {noAck: true}，这是最简单的消息确认模式，即<strong>消息发送即确认</strong>。当消息发送给消费者之后，消息就从队列中移除，不管消费者如何消费，顺利处理还是报错退出，消息不会复存。很多时候我们会觉得这种消息确认方式是不安全的，我们经常更希望消息能够正常处理后，消息才结束并从队列移除。</p>
+<p>如果我们想要手动确认消息，我们在消费消息的时候就需要将noAck参数设置为false，当然这个参数默认就是false，我们不显示设置这个参数默认就是需要手动确认消息。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> amqplib = <span class="built_in">require</span>(<span class="string">'amqplib'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">send</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> [url, queue] = [</span><br><span class="line">    <span class="string">'...'</span>,</span><br><span class="line">    <span class="string">'andy.test'</span></span><br><span class="line">  ]</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> channel = <span class="keyword">await</span> connnection.createChannel()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> channel.assertQueue(queue, &#123;<span class="attr">durable</span>: <span class="literal">true</span>&#125;)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> msg = <span class="keyword">await</span> channel.get(queue)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">send().then(<span class="keyword">async</span> () =&gt; &#123;&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;&#125;)</span><br></pre></td></tr></table></figure>
+<p>没有显示设置noAck为true，默认需要手动确认消息，但是这段代码我们没有显示手动确认消息，当我们运行的时候会发现消息已经从ready变成了unacked状态，表示消息等待确认。</p>
+<p><img src="/2018/09/22/JavaScript/RabbitMq系列03/node-rabbitmq-series-03/queues_msg_unacked.jpeg" alt=""></p>
+<p>一个待消费的消息状态为Ready，当消费者不管使用推模式还是拉模式使用{noAck: false}得到一个消息时，在手动确认之前，状态会变为unacked状态。这个时候如果这个消费者一直处于这个状态不确认消息，也不断开连接，这个消息会一直保持这个状态，其他消费者也不能消费这个消息。这个时候这个消费者有两种选择处理这个消息，一种是手动确认消息，消息最终从队列移除；另外一种是关闭连接，消息变回Ready状态，等待下一个消费者消费该消息</p>
+<p>手动确认消息很简单，只需要在消息处理完毕之后调用一个方法即可: channel.ack(msg)</p>
+<h4 id="推模式-1"><a href="#推模式-1" class="headerlink" title="推模式"></a>推模式</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> channel = connection.createChannel()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">handle</span> (<span class="params">msg</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> content = <span class="built_in">JSON</span>.parse(msg.content.toString()) <span class="comment">// 消息体</span></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'message received: '</span>, content)</span><br><span class="line">    <span class="keyword">await</span> channel.ack(msg) <span class="comment">// 确认消息</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">channel.consume(queue, handle)</span><br></pre></td></tr></table></figure>
+<h4 id="拉模式-1"><a href="#拉模式-1" class="headerlink" title="拉模式"></a>拉模式</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> channel = connection.createChannel()</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> msg = <span class="keyword">await</span> channel.get(queue)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> content = <span class="built_in">JSON</span>.parse(msg.content.toString())</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'message received: '</span>, content)</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.ack(msg)</span><br></pre></td></tr></table></figure>
+<h3 id="消息分发"><a href="#消息分发" class="headerlink" title="消息分发"></a>消息分发</h3><p>当我们有多个消费者在消费统一个队列的时候，消息是怎么分配给众多消费者的？</p>
+<p>首先需要说明的一点就是，RabbitMq的一条队列的一个消息只会发送给一个消费者处理，永远不会将同一个消息发送给多个消费者同时处理。只有一种情况一条消息前后经历过多个消费者处理，那就是前面处理的消费者没有确认消息，在它断开连接之后这条消息重新变成待消费状态之后发送给另外一个消费者处理。RabbitMq拒绝这种会导致功能变得复杂且难以理解的功能，如果我们期待一条消息可以被多个消费者处理，那我们应该声明一个fanout交换器，每个需要处理消息的消费者都将队列绑定到这个交换器，那么当有消息就可以收到了。</p>
+<h4 id="Round-robin（轮询分发）"><a href="#Round-robin（轮询分发）" class="headerlink" title="Round-robin（轮询分发）"></a>Round-robin（轮询分发）</h4><p>默认这种方式，RabbitMq会将消息分摊给每个消费者。如果当前队列有10条消息，有两个消费者，则[1, 3, 5, 7, 9]条消息将推送给先监听队列的消费者，[2, 4, 6, 8, 10]条消息将推送给后监听队列的消费者</p>
+<p>但是有时候我们不希望使用默认的这种方式，毕竟两个消费者处理能力不一样，处理消息能力强的消费者可能很快处理完了5条消息，处理能力弱的能需要很长的时间来处理一条消息。这个时候我们就希望RabbitMq按照处理能力分发消息，这就是下面讲到的另一个分发规则</p>
+<h4 id="Fair-dispatch（公平分发）"><a href="#Fair-dispatch（公平分发）" class="headerlink" title="Fair dispatch（公平分发）"></a>Fair dispatch（公平分发）</h4><p>这种方式，消费者消息的时候不能将 noAck 参数设置为true，消息确认方式应该保证为手动确认</p>
+<p>这种方式，我们使用basicQos( prefetchCount)方法，来限制RabbitMQ只发不超过指定条数的消息给同一个消费者。当消息处理完毕后，有了反馈，才会进行第二次发送。</p>
+<p>下面的逻辑将prefetch设置为1，表示消费者处理消息的并发值为1。RabbitMq会给消费者发送1条消息，在消息被确认之前不会发送第二条消息，而一旦消息被确认，马上发送一条新的消息，以保证该消费者始终有一条处理中的消息。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> amqplib = <span class="built_in">require</span>(<span class="string">'amqplib'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">send</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> [url, queue] = [</span><br><span class="line">    <span class="string">'...'</span>,</span><br><span class="line">    <span class="string">'andy.test'</span></span><br><span class="line">  ]</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> channel = <span class="keyword">await</span> connnection.createChannel()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> channel.prefetch(<span class="number">1</span>)</span><br><span class="line">  <span class="keyword">await</span> channel.assertQueue(queue, &#123;<span class="attr">durable</span>: <span class="literal">true</span>&#125;)</span><br><span class="line"></span><br><span class="line">  channel.consume(queue, <span class="keyword">async</span> msg =&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> content = <span class="built_in">JSON</span>.parse(msg.content.toString())</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'message received: '</span>, content)</span><br><span class="line">    <span class="keyword">await</span> channel.ack(msg)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">send().then(<span class="keyword">async</span> () =&gt; &#123;&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;&#125;)</span><br></pre></td></tr></table></figure>
+<p>代码的不同之处在于加了代码：channel.prefetch(1)。这行代码的位置没有限制，它对信道做了限制，一般在channel.consume之前指定就可以了。</p>
+<p><strong>如果不控制并发prefetch，或者noAck为true，RabbitMq会一次性将所有消息分摊给消费者，这经常会出现问题，如果两个消费者，队列有一百条消息，则每个消费者各得50条消息，相当于并发50。这种方法对服务不利，我们不应该出现这种情况，应该控制并发保证服务高可用。</strong></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NodeJs/" rel="tag"># NodeJs</a>
+          
+            <a href="/tags/RabbitMq/" rel="tag"># RabbitMq</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/15/JavaScript/RabbitMq系列02/" rel="next" title="RabbitMq系列二之Amqplib库(上)">
+                <i class="fa fa-chevron-left"></i> RabbitMq系列二之Amqplib库(上)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/23/JavaScript/RabbitMq系列04/" rel="prev" title="RabbitMq系列四之Amqplib库(下)">
+                RabbitMq系列四之Amqplib库(下) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Andy" />
+            
+              <p class="site-author-name" itemprop="name">Andy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#回顾"><span class="nav-number">1.</span> <span class="nav-text">回顾</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#交互时序图"><span class="nav-number">2.</span> <span class="nav-text">交互时序图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生产者发送消息"><span class="nav-number">3.</span> <span class="nav-text">生产者发送消息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sendToQueue-queue-msg-options"><span class="nav-number">3.1.</span> <span class="nav-text">sendToQueue(queue, msg, options)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#options常用参数："><span class="nav-number">3.1.1.</span> <span class="nav-text">options常用参数：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#publish-exchange-routingKey-msg-options"><span class="nav-number">3.2.</span> <span class="nav-text">publish(exchange, routingKey, msg, options)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生产者发送确认模式"><span class="nav-number">3.3.</span> <span class="nav-text">生产者发送确认模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消费者监听队列，消费消息"><span class="nav-number">4.</span> <span class="nav-text">消费者监听队列，消费消息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#推模式"><span class="nav-number">4.1.</span> <span class="nav-text">推模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#options参数"><span class="nav-number">4.1.1.</span> <span class="nav-text">options参数:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#拉模式"><span class="nav-number">4.2.</span> <span class="nav-text">拉模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息确认"><span class="nav-number">4.3.</span> <span class="nav-text">消息确认</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#推模式-1"><span class="nav-number">4.3.1.</span> <span class="nav-text">推模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#拉模式-1"><span class="nav-number">4.3.2.</span> <span class="nav-text">拉模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息分发"><span class="nav-number">4.4.</span> <span class="nav-text">消息分发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Round-robin（轮询分发）"><span class="nav-number">4.4.1.</span> <span class="nav-text">Round-robin（轮询分发）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Fair-dispatch（公平分发）"><span class="nav-number">4.4.2.</span> <span class="nav-text">Fair dispatch（公平分发）</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andy</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

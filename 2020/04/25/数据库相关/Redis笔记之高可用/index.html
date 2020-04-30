@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Redis," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这里主要介绍Redis通过主从模型实现高可用的机制，并且介绍到哨兵机制的使用 Redis的高可用单点服务始终会面临数据安全和服务故障问题，Redis针对这个问题提供了主从备份机制，其实很多服务都提供了主从备份机制，如MongoDB。 主从备份机制简单来说就是有多个Redis进程，这些进程一般配置在不同的机器中，其中一个进程充当master节点，其余进程充当slave节点。正常master节点向客户">
+<meta name="keywords" content="Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis使用笔记之主从备份">
+<meta property="og:url" content="http://yoursite.com/2020/04/25/数据库相关/Redis笔记之高可用/index.html">
+<meta property="og:site_name" content="Andy的个人博客">
+<meta property="og:description" content="这里主要介绍Redis通过主从模型实现高可用的机制，并且介绍到哨兵机制的使用 Redis的高可用单点服务始终会面临数据安全和服务故障问题，Redis针对这个问题提供了主从备份机制，其实很多服务都提供了主从备份机制，如MongoDB。 主从备份机制简单来说就是有多个Redis进程，这些进程一般配置在不同的机器中，其中一个进程充当master节点，其余进程充当slave节点。正常master节点向客户">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-04-28T15:51:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis使用笔记之主从备份">
+<meta name="twitter:description" content="这里主要介绍Redis通过主从模型实现高可用的机制，并且介绍到哨兵机制的使用 Redis的高可用单点服务始终会面临数据安全和服务故障问题，Redis针对这个问题提供了主从备份机制，其实很多服务都提供了主从备份机制，如MongoDB。 主从备份机制简单来说就是有多个Redis进程，这些进程一般配置在不同的机器中，其中一个进程充当master节点，其余进程充当slave节点。正常master节点向客户">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/04/25/数据库相关/Redis笔记之高可用/"/>
+
+
+
+
+
+  <title>Redis使用笔记之主从备份 | Andy的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andy的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/25/数据库相关/Redis笔记之高可用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andy的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Redis使用笔记之主从备份</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-25T10:44:07+08:00">
+                2020-04-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库相关/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库相关/Redis/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><em>这里主要介绍Redis通过主从模型实现高可用的机制，并且介绍到哨兵机制的使用</em></p>
+<h2 id="Redis的高可用"><a href="#Redis的高可用" class="headerlink" title="Redis的高可用"></a>Redis的高可用</h2><p>单点服务始终会面临数据安全和服务故障问题，Redis针对这个问题提供了主从备份机制，其实很多服务都提供了主从备份机制，如MongoDB。</p>
+<p>主从备份机制简单来说就是有多个Redis进程，这些进程一般配置在不同的机器中，其中一个进程充当master节点，其余进程充当slave节点。正常master节点向客户端提供读写服务，slave节点只是跟master连接实现数据备份，当master节点故障或者停止服务，slave中的某个节点会替换master成为新的master节点提供服务，以此实现Redis服务的高可用。</p>
+<p>Redis主从服务最合适的节点数为3个，包括1个master节点和2个slave节点</p>
+<h2 id="主从备份搭建"><a href="#主从备份搭建" class="headerlink" title="主从备份搭建"></a>主从备份搭建</h2><p>这里介绍如何搭建主从服务，前面写过一篇关于Redis的基础知识，其中包括了单节点Redis服务的安装过程，这里的操作会基于那篇文章之上开始搭建。有兴趣的可以前往阅读《<a href="[https://zhongxiaoyang.github.io/2019/07/23/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9B%B8%E5%85%B3/Redis%E7%AC%94%E8%AE%B0/](https://zhongxiaoyang.github.io/2019/07/23/数据库相关/Redis笔记/">Redis使用笔记</a>)》</p>
+<h3 id="搭建思路"><a href="#搭建思路" class="headerlink" title="搭建思路"></a>搭建思路</h3><p>本人只有一台机器，会选择同一台机器启动三个Redis进程来实现主从备份。三个Redis的配置为</p>
+<ul>
+<li>master节点：6379端口</li>
+<li>slave1节点：6381端口</li>
+<li>slave2节点：6382端口</li>
+</ul>
+<p>在开启搭建之前，请先在自己的机器安装好Redis，可以参考我前面一篇有关Redis的文章。</p>
+<h3 id="启动三个Redis进程"><a href="#启动三个Redis进程" class="headerlink" title="启动三个Redis进程"></a>启动三个Redis进程</h3><p>本机已经安装好redis-6379节点，接下来是按照redis-6381和redis-6382节点</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 前往/usr/local目录</span><br><span class="line">➜  ~ cd /usr/local</span><br><span class="line">➜  ls | grep redis-</span><br><span class="line"><span class="meta">#</span> redis-6379</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 1、创建redis-6381，redis-6382目录</span><br><span class="line">➜  sudo mkdir redis-6381 redis-6382</span><br><span class="line">➜  sudo mkdir redis-6381/log redis-6382/log</span><br><span class="line">➜  ls | grep redis-</span><br><span class="line"><span class="meta">#</span> redis-6379</span><br><span class="line"><span class="meta">#</span> redis-6381</span><br><span class="line"><span class="meta">#</span> redis-6382</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 2、复制redis.conf到新创建的两个目录</span><br><span class="line">➜  sudo cp redis-6379/redis.conf redis-6381/</span><br><span class="line">➜  sudo cp redis-6379/redis.conf redis-6382/</span><br><span class="line">➜  ls redis-6381 redis-6382</span><br><span class="line"><span class="meta">#</span> redis-6381:</span><br><span class="line"><span class="meta">#</span> redis.conf</span><br><span class="line"><span class="meta">#</span> redis-6382:</span><br><span class="line"><span class="meta">#</span> redis.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 3、创建对应的日志文件</span><br><span class="line">➜  sudo mkdir redis-6381/log redis-6382/log</span><br><span class="line">➜  sudo touch redis-6381/log/redis_log.log redis-6382/log/redis_log.log</span><br><span class="line"><span class="meta">#</span> 修改日志文件读写权限，反正Redis进程没有权限读写日志</span><br><span class="line">➜  sudo chmod 777 redis-6381/log/redis_log.log redis-6382/log/redis_log.log</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 4、修改slave1节点的redis.conf配置</span><br><span class="line">➜  sudo vim redis-6381/redis.conf</span><br><span class="line"><span class="meta">#</span>### 修改的配置项 </span><br><span class="line">port 6381 # 端口号</span><br><span class="line">pidfile /var/run/redis_6381.pid # 进程号文件</span><br><span class="line">dir /usr/local/redis-6381/ # 工作路径</span><br><span class="line">logfile /usr/local/redis-6381/log/redis_log.log # 日志文件</span><br><span class="line"><span class="meta">#</span>###</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 5、修改slave2节点的redis.conf配置</span><br><span class="line">➜  sudo vim redis-6382/redis.conf</span><br><span class="line"><span class="meta">#</span>### 修改的配置项 </span><br><span class="line">port 6382 # 端口号</span><br><span class="line">pidfile /var/run/redis_6382.pid # 进程号文件</span><br><span class="line">dir /usr/local/redis-6382/ # 工作路径</span><br><span class="line">logfile /usr/local/redis-6382/log/redis_log.log # 日志文件</span><br><span class="line"><span class="meta">#</span>###</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 6、启动Redis进程</span><br><span class="line">➜  sudo redis-server /usr/local/redis-6381/redis.conf</span><br><span class="line">➜  sudo redis-server /usr/local/redis-6382/redis.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 7、查看进程启动情况</span><br><span class="line">➜  ps -ef | grep redis</span><br><span class="line"><span class="meta">#</span>     0 54075     1   0 11:05下午 ??         1:22.27 redis-server 0.0.0.0:6379</span><br><span class="line"><span class="meta">#</span>   501 57669     1   0  2:16下午 ??         0:00.70 redis-server 0.0.0.0:6381</span><br><span class="line"><span class="meta">#</span>   501 57713     1   0  2:17下午 ??         0:00.38 redis-server 0.0.0.0:6382</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 8、使用客户端连接不同进程</span><br><span class="line">➜  redis-cli -p 6379</span><br><span class="line">➜  redis-cli -p 6381</span><br><span class="line">➜  redis-cli -p 6382</span><br><span class="line"><span class="meta">#</span> 注意，当Redis配置了password，则连接需要加上密码：redis-cli -a 密码 -p 端口</span><br></pre></td></tr></table></figure>
+<p>至此，三个独立的Redis进程就启动完毕了</p>
+<h3 id="配置主从服务"><a href="#配置主从服务" class="headerlink" title="配置主从服务"></a>配置主从服务</h3><p>前面启动的三个Redis进程都是互相独立的，相当于3个Redis服务，每个都是master</p>
+<p>现在我们要配置成一个master和两个slave节点的结构，其中master节点就是端口为6379的Redis进程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">➜  cd /usr/local</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 1、slave2节点配置</span><br><span class="line">➜  sudo vim redis-6381/redis.conf</span><br><span class="line"><span class="meta">#</span>###</span><br><span class="line"><span class="meta">#</span> replicaof &lt;masterip&gt; &lt;masterport&gt;</span><br><span class="line">replicaof 127.0.0.1 6379 # 配置副本连接的master接口</span><br><span class="line">masterauth &lt;master-password&gt; # 如果master节点需要密码连接，这里配置master节点的密码</span><br><span class="line"><span class="meta">#</span>###</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 2、slave2节点配置</span><br><span class="line">➜  sudo vim redis-6382/redis.conf</span><br><span class="line"><span class="meta">#</span>###</span><br><span class="line"><span class="meta">#</span> replicaof &lt;masterip&gt; &lt;masterport&gt;</span><br><span class="line">replicaof 127.0.0.1 6379 # 配置副本连接的master接口</span><br><span class="line">masterauth &lt;master-password&gt; # 如果master节点需要密码连接，这里配置master节点的密码</span><br><span class="line"><span class="meta">#</span>###</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 3、重启slave节点进程</span><br><span class="line">➜  redis-cli -p 6381</span><br><span class="line">127.0.0.1:6381&gt; shutdown # 执行shutdown执行</span><br><span class="line">➜  redis-cli -p 6382</span><br><span class="line">127.0.0.1:6381&gt; shutdown # 执行shutdown执行</span><br><span class="line">➜  sudo redis-server /usr/local/redis-6381/redis.conf</span><br><span class="line">➜  sudo redis-server /usr/local/redis-6382/redis.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 4、查看主从配置情况</span><br><span class="line"><span class="meta">#</span># master节点</span><br><span class="line">➜  redis-cli -p 6379</span><br><span class="line">127.0.0.1:6379&gt; info replication</span><br><span class="line"><span class="meta">#</span> role:master</span><br><span class="line"><span class="meta">#</span> connected_slaves:2</span><br><span class="line"><span class="meta">#</span> slave0:ip=127.0.0.1,port=6382,state=online,offset=0,lag=5</span><br><span class="line"><span class="meta">#</span> slave1:ip=127.0.0.1,port=6381,state=online,offset=0,lag=3</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># slave1节点(slave2节点也是一样的)</span><br><span class="line">➜  redis-cli -p 6381</span><br><span class="line">127.0.0.1:6381&gt; info replication</span><br><span class="line"><span class="meta">#</span> role:slave</span><br><span class="line"><span class="meta">#</span> master_host:127.0.0.1</span><br><span class="line"><span class="meta">#</span> master_port:6379</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 5、查看数据备份情况</span><br><span class="line"><span class="meta">#</span># 连接master节点，写入数据</span><br><span class="line">➜  redis-cli -p 6379</span><br><span class="line">127.0.0.1:6379&gt; set name andy</span><br><span class="line"><span class="meta">#</span> 打印：OK</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># 查看slave1节点备份情况</span><br><span class="line">➜  redis-cli -p 6381</span><br><span class="line">127.0.0.1:6381&gt; get name</span><br><span class="line"><span class="meta">#</span> 打印："andy"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># 查看slave2节点备份情况</span><br><span class="line">➜  redis-cli -p 6382</span><br><span class="line">127.0.0.1:6382&gt; get name</span><br><span class="line"><span class="meta">#</span> 打印："andy"</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>到此，主从备份模型搭建就完成了</p>
+<p>但是这样的模型只能做到数据备份，对于故障转移也就是高可用是实现不了的。当master节点宕机，slave节点不会自动挑选成为master。要实现高可用，需要配合Redis的哨兵机制</p>
+</blockquote>
+<h2 id="主从服务的数据备份机制"><a href="#主从服务的数据备份机制" class="headerlink" title="主从服务的数据备份机制"></a>主从服务的数据备份机制</h2><p>正常主从备份模型我们比较容易理解master节点写入数据，slave节点会自动更新数据。但是Redis的数据是有过期机制的，它的数据同步和过期数据管理机制是怎样的，很有必要了解一下。</p>
+<p><a href="https://redis.io/topics/replication" target="_blank" rel="noopener">参考官网</a></p>
+<h3 id="三种机制"><a href="#三种机制" class="headerlink" title="三种机制"></a>三种机制</h3><ul>
+<li>主从节点连接良好<ul>
+<li>master节点想slave节点发送命令流来保存数据同步。简单讲就是master节点的数据有变化有会发送指令给slave节点同步数据，所以slave节点无需管理键过期与否等逻辑</li>
+</ul>
+</li>
+<li>主从节点端口重连<ul>
+<li>不管因为网络问题或者超时断开连接等原因，当slave节点再次连接master节点后并不会重新全量备份数据，而是备份从断开时间开始的增量命令流</li>
+</ul>
+</li>
+<li>无法进行增量命令流同步的情况<ul>
+<li>不管什么原因，当slave节点无法使用增量命令流来同步连接之前的旧数据（如slave节点是在中途加入的，或者断开时间过长难以追溯完成的命令流），会进行全量同步。</li>
+<li>全量同步过程是master节点根据当前进行RDB持久化，然后将持久化的<code>.rdb</code>文件发送给从服务器。并在向服务器数据恢复过程中继续发送新数据修改的命令流保持数据实时性</li>
+</ul>
+</li>
+</ul>
+<h3 id="异步同步"><a href="#异步同步" class="headerlink" title="异步同步"></a>异步同步</h3><p>主从节点同步过程中是异步完成的，也就说说数据同步过程中，Redis主进程是可以继续处理客户端请求的。</p>
+<p>在主从节点同步过程中，master节点内部会维护一个队列，用来存放即将发送给从服务器的命令流，另外每个slave节点性能是有差异的，不同slave节点同步的进度又快又慢，master节点则通过记录每个slave节点同步的偏移量来知道不同slave节点同步的进度。</p>
+<p>Master节点维护的队列长度是有限的，当偏移量超出队列长度的slave节点的同步就会变成重新同步（全量同步）。偏移量超出队列长度的情况一般有某个slave节点与master节点断开连接比较长时间或者该slave节点是中途加入进来的。</p>
+<h3 id="master节点持久化功能"><a href="#master节点持久化功能" class="headerlink" title="master节点持久化功能"></a>master节点持久化功能</h3><p>有了主从备份模型，数据的安全性有了一定的保障，当master节点的压力越来越大，性能受到考验的时候，可以考虑关闭master节点的持久化功能来提高master的性能。（<strong>完全不建议这样做</strong>，因为当master节点重启后仍继续充当master节点的时候，它数据是空的，会导致slave节点同步后数据都为空）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 关闭rdb持久化，注释掉触发机制即可</span><br><span class="line"><span class="meta">#</span> save 900 1</span><br><span class="line"><span class="meta">#</span> save 300 10</span><br><span class="line"><span class="meta">#</span> save 60 10000</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 关闭aof持久化</span><br><span class="line">appendonly no</span><br></pre></td></tr></table></figure>
+<h2 id="故障转移-哨兵模式"><a href="#故障转移-哨兵模式" class="headerlink" title="故障转移-哨兵模式"></a>故障转移-哨兵模式</h2><p>哨兵是Redis内置的机制，安装Redis的时候在 /usr/local/bin 下会生成 redis-sentinel 命令。安装Redis的目录下除了有redis.conf配置文件外，还有sentinel.conf配置文件，专门针对哨兵机制的配置的。</p>
+<p>这里主要讲如何通过哨兵机制实现故障转移，也就是当master节点宕机了，slave节点能够挑选出新的master提供服务，以此实现服务的高可用，对于哨兵的其他知识不会深入探讨。</p>
+<h3 id="搭建故障转移机制"><a href="#搭建故障转移机制" class="headerlink" title="搭建故障转移机制"></a>搭建故障转移机制</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">➜  cd /usr/local</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 在每个Redis目录下建sentinel目录</span><br><span class="line">➜  sudo mkdir redis-6379/sentinel</span><br><span class="line">➜  sudo mkdir redis-6381/sentinel</span><br><span class="line">➜  sudo mkdir redis-6382/sentinel</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 复制sentinel.conf到新建的sentinel目录下</span><br><span class="line">➜  sudo cp redis-6379/sentinel.conf redis-6379/sentinel/</span><br><span class="line">➜  sudo cp redis-6379/sentinel.conf redis-6381/sentinel/</span><br><span class="line">➜  sudo cp redis-6379/sentinel.conf redis-6382/sentinel/</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 创建sentinel日志文件</span><br><span class="line">➜  sudo mkdir redis-6379/sentinel/log</span><br><span class="line">➜  sudo mkdir redis-6381/sentinel/log</span><br><span class="line">➜  sudo mkdir redis-6382/sentinel/log</span><br><span class="line">➜  sudo touch redis-6379/sentinel/log/sentinel.log</span><br><span class="line">➜  sudo touch redis-6381/sentinel/log/sentinel.log</span><br><span class="line">➜  sudo touch redis-6382/sentinel/log/sentinel.log</span><br><span class="line">➜  sudo chmod 777 redis-6379/sentinel/log/sentinel.log</span><br><span class="line">➜  sudo chmod 777 redis-6381/sentinel/log/sentinel.log</span><br><span class="line">➜  sudo chmod 777 redis-6382/sentinel/log/sentinel.log</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 修改sentinel.conf文件，这里每个Redis进程配置一个哨兵，所以需要改三个Redis的配置，其实改对应的端口号就行了</span><br><span class="line">➜  sudo vim redis-6329/sentinel/sentinel.conf</span><br><span class="line"><span class="meta">#</span>###修改项为</span><br><span class="line">protected-mode no # 关闭访问控制，用户自行控制该选项</span><br><span class="line">port 26379 # 另外两个节点分别是：26381 | 26382</span><br><span class="line">daemonize yes # 后台执行</span><br><span class="line">pidfile /var/run/redis-sentinel-26379.pid # 另外连个节点分别是：26381 | 26382</span><br><span class="line">dir /usr/local/redis-6379/sentinel/ # 另外两个节点改下 6329</span><br><span class="line">logfile /usr/local/redis-6379/sentinel/log/sentinel.log # 另外两个节点改下 6329</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># 下面选项自行配置</span><br><span class="line">sentinel monitor mymaster 127.0.0.1 6379 1 # 我的三个哨兵该配置都一样</span><br><span class="line">sentinel auth-pass mymaster 密码 # 主机密码</span><br><span class="line">sentinel down-after-milliseconds mymaster 300 # 主节点断开连接时长会认为需要重选master</span><br><span class="line">sentinel parallel-syncs mymaster 1</span><br><span class="line"><span class="meta">#</span>###</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 启动哨兵</span><br><span class="line">➜  sudo redis-sentinel redis-6379/sentinel/sentinel.conf</span><br><span class="line">➜  sudo redis-sentinel redis-6381/sentinel/sentinel.conf</span><br><span class="line">➜  sudo redis-sentinel redis-6382/sentinel/sentinel.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 进入哨兵进行状态查询</span><br><span class="line">redis-cli -p 26379 # 进入哨兵</span><br><span class="line">sentinel master mymaster</span><br><span class="line">sentinel slaves mymaster</span><br><span class="line">sentinel sentinels mymaster</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 关闭Redis主节点，查看新选举的master节点</span><br><span class="line">➜  redis-cli -p 6379</span><br><span class="line">127.0.0.1:6379&gt; shutdown</span><br><span class="line"><span class="meta">#</span># 查看新的master</span><br><span class="line">➜  redis-cli -p 6381</span><br><span class="line">127.0.0.1:6379&gt; info replication</span><br><span class="line"><span class="meta">#</span> role:slave</span><br><span class="line"><span class="meta">#</span> master_host:127.0.0.1</span><br><span class="line"><span class="meta">#</span> master_port:6382 # 可以看出新的master节点已经变成了6382对应的进程了</span><br></pre></td></tr></table></figure>
+<p>至此，包含一个master节点，两个slave接口的主从模型就搭建完了，并且配合哨兵机制，实现master节点自动选举功能。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Redis/" rel="tag"># Redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/17/计算机相关/Mac使用笔记/" rel="next" title="Mac使用笔记">
+                <i class="fa fa-chevron-left"></i> Mac使用笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/28/数据库相关/理解MongoDB的并发安全/" rel="prev" title="理解MongoDB的并发安全">
+                理解MongoDB的并发安全 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Andy" />
+            
+              <p class="site-author-name" itemprop="name">Andy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis的高可用"><span class="nav-number">1.</span> <span class="nav-text">Redis的高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主从备份搭建"><span class="nav-number">2.</span> <span class="nav-text">主从备份搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#搭建思路"><span class="nav-number">2.1.</span> <span class="nav-text">搭建思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动三个Redis进程"><span class="nav-number">2.2.</span> <span class="nav-text">启动三个Redis进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置主从服务"><span class="nav-number">2.3.</span> <span class="nav-text">配置主从服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主从服务的数据备份机制"><span class="nav-number">3.</span> <span class="nav-text">主从服务的数据备份机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#三种机制"><span class="nav-number">3.1.</span> <span class="nav-text">三种机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异步同步"><span class="nav-number">3.2.</span> <span class="nav-text">异步同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#master节点持久化功能"><span class="nav-number">3.3.</span> <span class="nav-text">master节点持久化功能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#故障转移-哨兵模式"><span class="nav-number">4.</span> <span class="nav-text">故障转移-哨兵模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#搭建故障转移机制"><span class="nav-number">4.1.</span> <span class="nav-text">搭建故障转移机制</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andy</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

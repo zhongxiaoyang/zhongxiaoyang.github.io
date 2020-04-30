@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Redis," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Redis什么是Redis NoSQL数据库 key-value存储 分布式缓存中间件，支持水平拓展 提供海量数据存储和访问，数据放在内存中，读取速度很快  为什么用缓存有时即使数据库做了很多优化：读写分离、分库、分片、集群，但是依然导致数据库慢查询甚至宕机。一个主要的原因就是常规数据库如MySQL、MongoDB等数据存在硬盘中，读取数据性能低下。 很多时候导致数据库问题的操作都是查询操作引起的">
+<meta name="keywords" content="Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis使用笔记">
+<meta property="og:url" content="http://yoursite.com/2020/02/23/数据库相关/Redis笔记/index.html">
+<meta property="og:site_name" content="Andy的个人博客">
+<meta property="og:description" content="Redis什么是Redis NoSQL数据库 key-value存储 分布式缓存中间件，支持水平拓展 提供海量数据存储和访问，数据放在内存中，读取速度很快  为什么用缓存有时即使数据库做了很多优化：读写分离、分库、分片、集群，但是依然导致数据库慢查询甚至宕机。一个主要的原因就是常规数据库如MySQL、MongoDB等数据存在硬盘中，读取数据性能低下。 很多时候导致数据库问题的操作都是查询操作引起的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/02/23/数据库相关/Redis笔记/Redis启动日志.png">
+<meta property="og:updated_time" content="2020-04-28T15:51:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis使用笔记">
+<meta name="twitter:description" content="Redis什么是Redis NoSQL数据库 key-value存储 分布式缓存中间件，支持水平拓展 提供海量数据存储和访问，数据放在内存中，读取速度很快  为什么用缓存有时即使数据库做了很多优化：读写分离、分库、分片、集群，但是依然导致数据库慢查询甚至宕机。一个主要的原因就是常规数据库如MySQL、MongoDB等数据存在硬盘中，读取数据性能低下。 很多时候导致数据库问题的操作都是查询操作引起的">
+<meta name="twitter:image" content="http://yoursite.com/2020/02/23/数据库相关/Redis笔记/Redis启动日志.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/02/23/数据库相关/Redis笔记/"/>
+
+
+
+
+
+  <title>Redis使用笔记 | Andy的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andy的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/23/数据库相关/Redis笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andy的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Redis使用笔记</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-23T23:50:28+08:00">
+                2020-02-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库相关/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库相关/Redis/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h2><h3 id="什么是Redis"><a href="#什么是Redis" class="headerlink" title="什么是Redis"></a>什么是Redis</h3><ul>
+<li>NoSQL数据库</li>
+<li>key-value存储</li>
+<li>分布式缓存中间件，支持水平拓展</li>
+<li>提供海量数据存储和访问，数据放在内存中，读取速度很快</li>
+</ul>
+<h3 id="为什么用缓存"><a href="#为什么用缓存" class="headerlink" title="为什么用缓存"></a>为什么用缓存</h3><p>有时即使数据库做了很多优化：读写分离、分库、分片、集群，但是依然导致数据库慢查询甚至宕机。一个主要的原因就是常规数据库如MySQL、MongoDB等数据存在硬盘中，读取数据性能低下。</p>
+<p>很多时候导致数据库问题的操作都是查询操作引起的，这里说的是很多情况下</p>
+<p>所以结合这两者，把一些经常访问到的数据缓存起来，当用户访问已缓存的数据就可以直接从缓存中获取数据返回，整个访问过程无需经过数据库操作。</p>
+<h3 id="对比Ehcache、Memcache"><a href="#对比Ehcache、Memcache" class="headerlink" title="对比Ehcache、Memcache"></a>对比Ehcache、Memcache</h3><ul>
+<li>Ehcache<ul>
+<li>优点：Apache认证、java开发；基于JVM缓存</li>
+<li>缺点：单点，不支持集群；不支持分布式拓展</li>
+</ul>
+</li>
+<li>Memcache<ul>
+<li>优点：key-value存储；多核多线程，内存和CPU使用率高</li>
+<li>缺点：不能持久化；不能容灾</li>
+</ul>
+</li>
+<li>Redis<ul>
+<li>优点：数据类型丰富；支持持久化：RDB、AOF；支持主从、集群和分布式</li>
+<li>缺点：单核，建议多实例充分利用CPU；单线程，不建议大数据量存储和操作</li>
+</ul>
+</li>
+</ul>
+<h3 id="理解Redis的单线程架构"><a href="#理解Redis的单线程架构" class="headerlink" title="理解Redis的单线程架构"></a>理解Redis的单线程架构</h3><h3 id="Mac快速安装Redis"><a href="#Mac快速安装Redis" class="headerlink" title="Mac快速安装Redis"></a>Mac快速安装Redis</h3><ul>
+<li><a href="https://redis.io/download" target="_blank" rel="noopener">下载Redis</a>，我本机下载到了 ~/Downloads/ 下。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 下载的文件：redis-5.0.8.tar.gz</span><br><span class="line"><span class="meta">#</span> 移动文件到/usr/local/下</span><br><span class="line">➜  sudo mv redis-5.0.8.tar.gz /usr/local/</span><br><span class="line"><span class="meta">#</span> 解压\重命名\删除下载文件</span><br><span class="line">➜  cd /usr/local</span><br><span class="line">➜  sudo tar zxvf redis-5.0.8.tar.gz</span><br><span class="line">➜  sudo mv redis-5.0.8 redis-6379</span><br><span class="line">➜  sudo rm redis-5.0.8.tar.gz</span><br><span class="line"></span><br><span class="line">➜  cd redis-6379</span><br><span class="line">➜  sudo make test # 编译测试</span><br><span class="line">➜  sudo make install # 编译安装</span><br><span class="line"><span class="meta">#</span>### 安装完后 /user/local/bin下回多出几个Redis相关文件</span><br><span class="line">redis-benchmark # 批量性能测试相关</span><br><span class="line">redis-check-aof # 与AOF持久化有关</span><br><span class="line">redis-check-rdb # 与RDB持久化有关</span><br><span class="line">redis-cli # 客户端</span><br><span class="line">redis-sentinel # 与哨兵有关</span><br><span class="line">redis-server # 服务端</span><br><span class="line"><span class="meta">#</span>###</span><br><span class="line"></span><br><span class="line">➜  vim redis.conf</span><br><span class="line"><span class="meta">#</span>### 修改项</span><br><span class="line">daemonize yes # 后台执行</span><br><span class="line">dir /usr/local/redis-6379/ # 工作路径</span><br><span class="line">bind 0.0.0.0 # ip访问控制设置为开发</span><br><span class="line">requirepass 123456 # 设置密码，默认是关闭的</span><br><span class="line">port 6379</span><br><span class="line">pidfile /var/run/redis_6379.pid # 进程id存放文件，最好跟从端口号，以防一台机器启动多个Redis时进程重复</span><br><span class="line">maxclients 0 # 客户端默认连接数，默认0不限制</span><br><span class="line">timeout 0 # 客户端连接的超时时长，Redis默认不会踢掉客户端连接的</span><br><span class="line">logfile /usr/local/redis-6379/log/redis_log.log # 日志文件，主要权限问题，可以把权限改成777</span><br><span class="line"><span class="meta">#</span>###</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 启动Redis，启动Redis全靠redis.conf</span><br><span class="line">➜  sudo redis-server /usr/local/redis-6379/redis.conf</span><br><span class="line">53683:C 24 Apr 2020 22:47:40.437 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo</span><br><span class="line">53683:C 24 Apr 2020 22:47:40.437 # Redis version=5.0.8, bits=64, commit=00000000, modified=0, pid=53683, just started</span><br><span class="line">53683:C 24 Apr 2020 22:47:40.437 # Configuration loaded</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 至此Redis的安装和启动就完成了，接下来就可以使用redis-cli客户端工具连接Redis服务器了</span><br><span class="line">➜  redis-cli</span><br></pre></td></tr></table></figure>
+<h2 id="Redis数据类型"><a href="#Redis数据类型" class="headerlink" title="Redis数据类型"></a>Redis数据类型</h2><h3 id="操作key"><a href="#操作key" class="headerlink" title="操作key"></a>操作key</h3><p>Redis底层是用hash存储数据，也就是每个数据对应一个key-value，因此就有了可以操作不同类型的key的统一指令，这些指令就包括（常用的）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 判断key是否存在</span><br><span class="line">exists keyname</span><br><span class="line"><span class="meta">#</span> 删除某key</span><br><span class="line">del keyname</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 设置过期时间</span><br><span class="line">expire keyname seconds # 单位秒</span><br><span class="line">expireat keyname timestamp # unix时间戳</span><br><span class="line">pexpire keyname milliseconds # 单位毫秒</span><br><span class="line">pexpire keyname milliseconds-timestamp # 时间戳</span><br><span class="line"><span class="meta">#</span> 取消过期限制</span><br><span class="line">persist keyname</span><br><span class="line"><span class="meta">#</span> 剩余过期时间</span><br><span class="line">ttl keyname # 单位秒</span><br><span class="line">pttl keyname # 单位毫秒</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 修改key名</span><br><span class="line">rename keyname newkeyname</span><br><span class="line">renamenx keyname newkeyname # 仅当keyname不存在时</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> key对应的value存储类型</span><br><span class="line">type keyname</span><br></pre></td></tr></table></figure>
+<h3 id="string"><a href="#string" class="headerlink" title="string"></a>string</h3><p>Redis 是用C语言开发的，但是字符串实现上没有完全使用C语言的字符串标准，自己构造了一个字符串类型。而在构建的字符串类型中加入len和free属性，len属性使Redis获取字符串值的长度的时间复杂度为O(1)、free属性作用域内存重分配，方便于字符串的修改。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">set key value # 设置key的值，不存在则添加，存在则覆盖</span><br><span class="line">setnx key value # 设置key的值，不存在则添加，存在则不操作</span><br><span class="line"></span><br><span class="line">get key</span><br><span class="line">getrange key start end # 获取指定区间的字符串，0是开始，-1是结尾</span><br><span class="line">getset key value # 设置key的值，返回原值。首次设置返回nil</span><br><span class="line"></span><br><span class="line">strlen key # 返回字符串值的长度，对应字符串解构的len属性</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> value如果存的是数字，支持针对数字的操作</span><br><span class="line">incr key # value数值加1，只用于整数</span><br><span class="line">incrby key increment # 给整数value加指定值，非整数value或者increment不是整数不能用该命令</span><br><span class="line">decr key # value数值减1，只用于整数</span><br><span class="line">decrby key decrement # value数值减去指定值，只用于整数</span><br><span class="line"></span><br><span class="line">incrbyfloat key increment # 给浮点数加指定值 | incrbyfloat money -1.01 减去指定值</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>整数与小数是看存储的value是否带小数，看如下示例</strong></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">set age 10</span><br><span class="line"><span class="meta">#</span> OK</span><br><span class="line">get age</span><br><span class="line"><span class="meta">#</span> "10"</span><br><span class="line">incr age</span><br><span class="line"><span class="meta">#</span> (integer) 11</span><br><span class="line">incrbyfloat age 0.01</span><br><span class="line"><span class="meta">#</span> "11.01"</span><br><span class="line">incr age</span><br><span class="line"><span class="meta">#</span> (error) ERR value is not an integer or out of range</span><br><span class="line">incrbyfloat age -0.01</span><br><span class="line"><span class="meta">#</span> "11"</span><br><span class="line">incr age</span><br><span class="line"><span class="meta">#</span> (integer) 12</span><br></pre></td></tr></table></figure>
+<h3 id="hash"><a href="#hash" class="headerlink" title="hash"></a>hash</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 设置user对象，包含name和money属性</span><br><span class="line">hset user name andy money 10.01 age 28</span><br><span class="line">hmset key field1 value1 field2 value2 # 同时设置多个属性</span><br><span class="line">hsetnx key field value # 仅field不存在时使用</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 查看对象属性是否存在</span><br><span class="line">hexists user name # 1</span><br><span class="line">hexists user name1 # 0</span><br><span class="line"></span><br><span class="line">hget user name # 获取属性</span><br><span class="line">hdel user name # 删除属性</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 数值属性操作，传负数表示减去指定值</span><br><span class="line">hincrby user age 1 # 整数属性</span><br><span class="line">hincrbyfloat user money 0.01 # 浮点数属性</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 获取所有key-value</span><br><span class="line">hgetall user</span><br><span class="line"><span class="meta">#</span> 获取所有key</span><br><span class="line">hkeys user</span><br><span class="line"><span class="meta">#</span> 获取所有值</span><br><span class="line">hvals user</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 根据projection获取key-value</span><br><span class="line">hmget user name age money</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 属性数量</span><br><span class="line">hlen user</span><br></pre></td></tr></table></figure>
+<h3 id="list"><a href="#list" class="headerlink" title="list"></a>list</h3><p>C语言底层没有链表结构，Redis自己封装了一个链表结构，而该链表结构包含头部节点和尾部节点的指向，所以Redis的链表结构操作头部和操作尾部都是很方便的，也由此Redis的列表是支持栈和队列类似的功能的</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 添加元素到列表</span><br><span class="line">lpush books js java python # 从头部依次添加</span><br><span class="line">rpush books c++ go # 从尾部依次添加</span><br><span class="line">linsert books before|after java ts # 在某个元素 前|后 添加元素，从左往右找第一个匹配项</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 修改元素值</span><br><span class="line">lset books 2 JavaScript # 设置某个下标元素的值</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 列表截取</span><br><span class="line">ltrim books 1 2 # 只保留第2到第3个元素，其余元素删掉</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 取数据</span><br><span class="line">lpop books # 获取第一个元素（栈取出方式，取出即删除）</span><br><span class="line">rpop books # 获取最后一个元素（队列取出方式，取出即删除）</span><br><span class="line"></span><br><span class="line">lindex books index # 使用下标获取元素</span><br><span class="line">llen books # 列表长度</span><br><span class="line">lrange books 0 -1 # 获取列表指定范围内元素，这里获取全部元素</span><br></pre></td></tr></table></figure>
+<h3 id="set"><a href="#set" class="headerlink" title="set"></a>set</h3><p>无序集合，字符串成员，不允许重复，底层通过哈希表实现，添加、删除和查找时间复杂度都是O(1)，每个集合能存储<code>2^23 - 1</code>个成员。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 添加成员,一个或多个</span><br><span class="line">sadd users andy [ciro]</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 写操作</span><br><span class="line">spop users # 随机删除成员</span><br><span class="line">srem users andy [ciro] # 移除成员</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 获取数据</span><br><span class="line">scard users # 成员数</span><br><span class="line">sismember users andy # 判断Andy是否是成员之一</span><br><span class="line">smembers users # 获取所有成员</span><br><span class="line">srandmember users 3 # 随机返回集合的3个元素</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 集合之间</span><br><span class="line">sdiff users users2 # 获取只在users2集合而不在users集合的成员</span><br><span class="line">sdiffstore newUsers users users2 # sdiff命令只是返回，这个命令除了返回还新建newUsers集合存新成员</span><br><span class="line">sinter users users2 # 交集</span><br><span class="line">sinterstore newUsers users users2 # 获取交集并保存新集合</span><br><span class="line">sunion users users2 # 并集</span><br><span class="line">sunionstore newUsers users users2 # 获取并集并保存新集合</span><br><span class="line">smove users users2 tony # 将users集合的tony成员移到users2集合</span><br></pre></td></tr></table></figure>
+<h3 id="zset"><a href="#zset" class="headerlink" title="zset"></a>zset</h3><p>有续集合，字符串成员，每个成员关联一个double类型分数，成员不允许重复。跟set集合一样，底层都是使用哈希表实现的</p>
+<blockquote>
+<p><strong>需要注意有序集合默认按分数大小排序，对应相同的分数会根据成员名称的编码顺序排序。</strong></p>
+<p>如果不想使用默认的排序规则，应该设法保证分数不重复，或者做成即使重复也不影响。</p>
+<p>想要分数不重复，可以处理一下分数，比如当分数确定是整数时可以给分数加上精确到秒的时间戳小数，取出后去掉小数部分即可。具体可根据业务处理</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 添加一个或多个成员</span><br><span class="line">zadd rank 10 andy 11 ciro 9 tony 11 bingo 11 hans</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 更新集合</span><br><span class="line">zincrby rank 10 andy # andy分数加10</span><br><span class="line">zrem rank andy # 移除一个或多个成员</span><br><span class="line">zremrangebyrank rank 0 2 # 移除降序排序前三成员</span><br><span class="line">zremrangebyscore rank 9 11 # 移除分数在[9, 11]区间的成员</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 获取数据</span><br><span class="line">zcard rank # 成员数</span><br><span class="line">zscore rank andy # 成员分数</span><br><span class="line">zcount rank 9 10 # 分数在[9, 10]区间的成员数</span><br><span class="line"><span class="meta">#</span> rank</span><br><span class="line">zrank rank andy # 返回andy的升序索引</span><br><span class="line">zrevrank rank andy # 降序索引，对应排名</span><br><span class="line"><span class="meta">#</span> range</span><br><span class="line">zrange rank 0 2 [withscores] # 获取升序中前三名成员[和分数]</span><br><span class="line">zrevrange rank 0 2 [whthscores] # 获取排名前三的成员[和分数]</span><br><span class="line">zrangebyscore rank 9 11 [whthscores] # 获取分数在[9, 11]区间的成员[和分数],升序</span><br><span class="line">zrevrangebyscore rank 9 11 [whthscores] # 获取分数在[9, 11]区间的成员[和分数]，降序</span><br><span class="line">zrangebyscore rank (9 11 [whthscores] # (9, 11]区间</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 集合之间</span><br><span class="line">zinterstore ... # 集合交集</span><br><span class="line">zunionstore ... # 集合并集</span><br></pre></td></tr></table></figure>
+<h3 id="geo"><a href="#geo" class="headerlink" title="geo"></a>geo</h3><p>该功能在Redis3.2版本后才支持</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 添加城市坐标</span><br><span class="line">geoadd cities 116.408 39.904 北京 121.445 31.213 上海 116.401 39.901 自定义</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 两点间距离,可选单位 m\km\mi\ft</span><br><span class="line">geodist cities 上海 北京 km # 上海到北京的距离，打印："1068.2320"</span><br><span class="line">geodist cities 自定义 北京 km # 打印"0.6843"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 应用之一：搜索附近</span><br><span class="line">georadiusbymember cities 北京 1 km withdist withcoord asc # 打印如下</span><br><span class="line">1) 1) "北京"</span><br><span class="line">   2) "0.0000"</span><br><span class="line">   3) 1) "116.40800267457962036"</span><br><span class="line">      2) "39.90399988166036138"</span><br><span class="line">2) 1) "自定义"</span><br><span class="line">   2) "0.6843"</span><br><span class="line">   3) 1) "116.40100210905075073"</span><br><span class="line">      2) "39.90099877180769994"</span><br></pre></td></tr></table></figure>
+<h2 id="Redis数据库"><a href="#Redis数据库" class="headerlink" title="Redis数据库"></a>Redis数据库</h2><h3 id="Redis数据库-1"><a href="#Redis数据库-1" class="headerlink" title="Redis数据库"></a>Redis数据库</h3><p>Redis默认创建16个数据库。数据库数量可以在redis.conf中配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> Set the number of databases. The default database is DB 0, you can select</span><br><span class="line"><span class="meta">#</span> a different one on a per-connection basis using SELECT &lt;dbid&gt; where</span><br><span class="line"><span class="meta">#</span> dbid is a number between 0 and 'databases'-1</span><br><span class="line">databases 16</span><br></pre></td></tr></table></figure>
+<p>Redis服务器的不同数据库的数据是独立的，相当于一个MySQL服务器可以创建多个数据库。Redis数据库底层是通过哈希表来存储数据，可以简单理解成每个数据库就是一个哈希表结构，每个key-value的key都是字符串，value则可以是各种Redis数据类型。</p>
+<p>Redis客户端的目标数据库dbid默认是0，但是每个Redis客户端可以使用select指令切换到不同的数据库（这里说的只是单机Redis服务器下，集群模式只有一个db0），不过不建议客户端这么做，我个人建议使用默认的0号数据库。</p>
+<blockquote>
+<p>其他15个数据库那还有用吗，我目前用的比较少，如果说一定要找个用法的话，我觉得在机器资源比较少，并且只有一个Redis进程的话，可以考虑用不同dbid表示的数据库存储不同环境的缓存数据。</p>
+</blockquote>
+<h4 id="数据库操作指令"><a href="#数据库操作指令" class="headerlink" title="数据库操作指令"></a>数据库操作指令</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 关闭Redis服务器</span><br><span class="line">shutdown</span><br><span class="line"><span class="meta">#</span> 删除所有dbid的所有数据</span><br><span class="line">flushall</span><br><span class="line"><span class="meta">#</span> 删除当前dbid的所有数据</span><br><span class="line">flushdb</span><br><span class="line"><span class="meta">#</span> 数据库键数量</span><br><span class="line">dbsize</span><br><span class="line"><span class="meta">#</span> 随机返回数据库某个键</span><br><span class="line">randomkey</span><br></pre></td></tr></table></figure>
+<h3 id="键的生命周期"><a href="#键的生命周期" class="headerlink" title="键的生命周期"></a>键的生命周期</h3><p>Redis可以设置key的有效时间，超出有效时间的key会自动被清除。相关指令介绍包括</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 设置键过期时间</span><br><span class="line">expire key time</span><br><span class="line">pexpire key time</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 设置键的同时设置过期时间</span><br><span class="line">setex key value</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 查看键的剩余生存时间</span><br><span class="line">ttl key</span><br><span class="line">pttl key</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 接触过期时间</span><br><span class="line">persist key</span><br></pre></td></tr></table></figure>
+<h4 id="过期键清除策略"><a href="#过期键清除策略" class="headerlink" title="过期键清除策略"></a>过期键清除策略</h4><p>Redis使用惰性删除和定期删除两种策略，两种方式配合服务器可以更好地在使用CPU时间和避免浪费内存空间之间取得平衡</p>
+<ul>
+<li>惰性删除：放任key过期不管，但是每次操作这个key都检查一下是否过期，如果过期就删除</li>
+<li>定期删除：每隔一段时间程序就检查一下数据库，删除里面的过期key</li>
+</ul>
+<p>RDB持久化策略不会备份过期键，恢复的时候已过期的键也会被忽略不会载入</p>
+<p>AOF持久化策略只要key没有被删除就会做备份，当key被删除后，程序会向AOF文件追加del指令删除该key。重写的时候如果key被删除了，就会移除掉。</p>
+<h2 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h2><p>Redis是内存数据库，安全性很重要。持久化是解决数据安全问题的其中一个方式。Redis提供了RDB和AOF两种持久化方式，各有不同优缺点，当然其中一个方式的缺点就是另一个方式的优点，使用者可自行选择。</p>
+<h3 id="RDB持久化"><a href="#RDB持久化" class="headerlink" title="RDB持久化"></a>RDB持久化</h3><h4 id="存储位置"><a href="#存储位置" class="headerlink" title="存储位置"></a>存储位置</h4><p>该持久化方式会生成<code>*.rdb</code>文件，默认是dump.rdb名称，当然名称可以在Redis安装目录下redis.conf文件中配置，对应的配置项为</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> The filename where to dump the DB</span><br><span class="line">dbfilename dump.rdb</span><br></pre></td></tr></table></figure>
+<h4 id="持久化机制"><a href="#持久化机制" class="headerlink" title="持久化机制"></a>持久化机制</h4><p>RDB备份方式每次备份都是全量备份，备份过程会生成<code>.rdb</code>文件，备份时生成新的文件，备份完成后移除旧的备份文件，以此保证最新状态都保存在dump.rdb。</p>
+<blockquote>
+<p> 也正因为每次备份都是全量备份，当前内存中有多少数据就保存多少数据，所以有很多种方式可以优化备份存储工作，比如使用二进制压缩存储，这种压缩存储方式使得这种备份后的文件相对AOF备份的文件小的多</p>
+<p>另外这种备份方式文件存储的都是数据，Redis启动恢复的时候只需要把数据加载到内存中即可，这也是RDB备份方法相对AOF备份方法恢复更快的原因</p>
+</blockquote>
+<p>在RDB备份的时候，Redis服务器可以选择fork一个进程来操作持久化备份工作（bgsave指令），期间不影响服务的正常运行。</p>
+<p>Redis有两个指令可以触发该持久化备份，save指令和bgsave指令，两个指令不同之处</p>
+<ul>
+<li>save：立即备份，服务端主进程执行备份，因为Redis是单线程的，所以备份期间不能处理客户端请求，慎用该指令，特别是数据量大的生产环境</li>
+<li>bgsave：fork子进程执行备份，服务端（父进程）可以正常处理客户端请求</li>
+</ul>
+<blockquote>
+<p>bgsave指令执行过程中发起的save和bgsave指令都会被拒绝，后面AOF持久化会用到bgrewriteaof指令，三个指令并发关系是</p>
+<ul>
+<li>bgsave指令执行期间，发起的save指令会被拒绝，发起的bgrewriteaof指令延迟到bgsave完成后执行</li>
+<li>bgrewriteaof指令执行期间，发起的save和bgsave指令都会被拒绝<ul>
+<li>这是出于性能考虑，同时fork多个进程会影响Redis服务端的性能</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>RDB持久化机制是服务端每个一段时间全量备份一次，内部使用的就是bgsave指令，可以通过redis.conf文件配置触发备份时间，默认的触发机制如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>############################### SNAPSHOTTING  ################################</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span> Save the DB on disk:</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span>   save &lt;seconds&gt; &lt;changes&gt;</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span>   Will save the DB if both the given number of seconds and the given</span><br><span class="line"><span class="meta">#</span>   number of write operations against the DB occurred.</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span>   In the example below the behaviour will be to save:</span><br><span class="line"><span class="meta">#</span>   after 900 sec (15 min) if at least 1 key changed （900秒内至少有1个key被修改）</span><br><span class="line"><span class="meta">#</span>   after 300 sec (5 min) if at least 10 keys changed （300秒内至少有10个key被修改）</span><br><span class="line"><span class="meta">#</span>   after 60 sec if at least 10000 keys changed （60秒内至少有10000个key被修改）</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span>   Note: you can disable saving completely by commenting out all "save" lines.</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span>   It is also possible to remove all the previously configured save</span><br><span class="line"><span class="meta">#</span>   points by adding a save directive with a single empty string argument</span><br><span class="line"><span class="meta">#</span>   like in the following example:</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span>   save ""</span><br><span class="line"></span><br><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure>
+<p>所以默认当你修改的key的数量为</p>
+<ul>
+<li>[0, 10)个，那么最迟备份时间要15分钟后</li>
+<li>[10, 10000)个，最迟备份时间是5分钟后</li>
+<li>[10000, +无穷)个，最迟备份时间是1分钟后</li>
+</ul>
+<blockquote>
+<p>可以通过修改（删除，添加）这些机制来达到我们想要的触发频率，但是该备份方式是全量备份的，设置频率的时候应结合应用场景的数据量和实时性要求</p>
+</blockquote>
+<h4 id="恢复机制"><a href="#恢复机制" class="headerlink" title="恢复机制"></a>恢复机制</h4><p>Redis启动加载RDB备份是自动完成的，无需人工做任何操作。比如正常我们启动Redis会打印对应的日志：</p>
+<p><img src="/2020/02/23/数据库相关/Redis笔记/Redis启动日志.png" alt="Redis启动日志"></p>
+<p>在Redis服务初始化之后会加载备份数据，还原Redis状态，等一切准备就绪，服务端才开始接受客户端连接和请求</p>
+<h4 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li>优点<ul>
+<li>每次备份生成dump.rdb文件，这个文件灾备简单，直接copy到其他地方就可用</li>
+<li>节省存储空间</li>
+<li>恢复性能较快</li>
+</ul>
+</li>
+<li>缺点<ul>
+<li>全量备份导致备份触发机制只能是定时备份，如果备份频率高，每次全量备份会消耗性能</li>
+<li>定时备份除了做不到实时，当服务端宕机会有一小部分数据未备份</li>
+<li>当数据量大的时候，每次全量备份时期服务端性能会下降：CPU和内存激增</li>
+</ul>
+</li>
+</ul>
+<h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><p>AOF则需要用户手动启用，这种备份方式是通过备份客户端写指令的方式做到实时或者相对实时效果的，所以磁盘的写入操作是追加写入，不需要修改已写入数据，对应文件是<code>*.aof</code>文件，文件名也是可以配置的，默认是<code>appendonly.aof</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 是否开启AOF持久化，默认关闭：no</span><br><span class="line">appendonly no | yes</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> The name of the append only file (default: "appendonly.aof")</span><br><span class="line">appendfilename "appendonly.aof"</span><br></pre></td></tr></table></figure>
+<p>这种备份方式会有一个问题就是同一个key频繁操作，备份文件也会保存很多个这个key的指令，为了解决这个问题，Redis使用了重写机制，重写机制就是当<code>.aof</code>文件大小超过某些条件的时候触发重写，而所谓重写就是根据内存中数据的状态生成新的操作指令。比如原来有个字符串key，前后操作了100次写入，aof文件也对应着100条写指令备份，重写后就只有一条指令: set key value。触发重写必须满足两个条件，对应redis.conf的配置项为</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 现有备份文件比上次大了100%</span><br><span class="line">auto-aof-rewrite-percentage 100</span><br><span class="line"><span class="meta">#</span> 现有备份文件大于64MB</span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br></pre></td></tr></table></figure>
+<h4 id="持久化机制-1"><a href="#持久化机制-1" class="headerlink" title="持久化机制"></a>持久化机制</h4><p>该持久化是通过bgrewriteaof指令完成的，执行这个指令也会fork一个新进程来执行，同样不会影响主进程响应客户端请求</p>
+<p>Redis提供两种方式控制aof持久化备份的频率，是通过配置下面配置项实现的，具体描述已经说明的很具体了</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> Redis supports three different modes:</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span> no: don't fsync, just let the OS flush the data when it wants. Faster.</span><br><span class="line"><span class="meta">#</span> always: fsync after every write to the append only log. Slow, Safest.</span><br><span class="line"><span class="meta">#</span> everysec: fsync only one time every second. Compromise.</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span> The default is "everysec", as that's usually the right compromise between</span><br><span class="line"><span class="meta">#</span> speed and data safety. It's up to you to understand if you can relax this to</span><br><span class="line"><span class="meta">#</span> "no" that will let the operating system flush the output buffer when</span><br><span class="line"><span class="meta">#</span> it wants, for better performances (but if you can live with the idea of</span><br><span class="line"><span class="meta">#</span> some data loss consider the default persistence mode that's snapshotting),</span><br><span class="line"><span class="meta">#</span> or on the contrary, use "always" that's very slow but a bit safer than</span><br><span class="line"><span class="meta">#</span> everysec.</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span> More details please check the following article:</span><br><span class="line"><span class="meta">#</span> http://antirez.com/post/redis-persistence-demystified.html</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span> If unsure, use "everysec".</span><br><span class="line"></span><br><span class="line">appendfsync everysec</span><br><span class="line"><span class="meta">#</span> appendfsync always</span><br><span class="line"><span class="meta">#</span> appendfsync no</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>重启Redis切忌使用kill指令，会导致Redis当前数据无法写入aof或rdb，应该时候shutdown指令</p>
+</blockquote>
+<h4 id="恢复机制-1"><a href="#恢复机制-1" class="headerlink" title="恢复机制"></a>恢复机制</h4><p>Redis启动过程中会先检查aof持久化开启情况，如果开启了aof持久化则从aof文件恢复数据，如果没有开启则从rdb文件中恢复数据</p>
+<blockquote>
+<p>如果现在没有开启AOF且打算要开启，不要直接修改配置文件然后重启Redis来生成AOF</p>
+<p>应该先使用redis-cli进入Redis，执行下面命令临时开启AOF，然后在修改redis.conf文件相关配置</p>
+<ul>
+<li>临时开启AOF，并且保证aof文件已经生成</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span> config set appendonly yes</span><br><span class="line"><span class="meta">&gt;</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<blockquote>
+<ul>
+<li>修改redis.conf文件</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span> appendonly yes</span><br><span class="line"><span class="meta">&gt;</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="优缺点-1"><a href="#优缺点-1" class="headerlink" title="优缺点"></a>优缺点</h4><ul>
+<li>优点<ul>
+<li>相对实时的备份机制</li>
+</ul>
+</li>
+<li>缺点<ul>
+<li>相同的数据，aof文件会比rdb文件大</li>
+<li>恢复的时候加载的文件大，而且需要执行全部指令，性能比rdb备份机制慢</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Redis/" rel="tag"># Redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/01/JavaScript/消息队列beanstalkd使用详解/" rel="next" title="消息队列Beanstalkd使用详解">
+                <i class="fa fa-chevron-left"></i> 消息队列Beanstalkd使用详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/17/计算机相关/Http协议入门/" rel="prev" title="了解Http协议">
+                了解Http协议 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Andy" />
+            
+              <p class="site-author-name" itemprop="name">Andy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis"><span class="nav-number">1.</span> <span class="nav-text">Redis</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是Redis"><span class="nav-number">1.1.</span> <span class="nav-text">什么是Redis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么用缓存"><span class="nav-number">1.2.</span> <span class="nav-text">为什么用缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对比Ehcache、Memcache"><span class="nav-number">1.3.</span> <span class="nav-text">对比Ehcache、Memcache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#理解Redis的单线程架构"><span class="nav-number">1.4.</span> <span class="nav-text">理解Redis的单线程架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mac快速安装Redis"><span class="nav-number">1.5.</span> <span class="nav-text">Mac快速安装Redis</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis数据类型"><span class="nav-number">2.</span> <span class="nav-text">Redis数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#操作key"><span class="nav-number">2.1.</span> <span class="nav-text">操作key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#string"><span class="nav-number">2.2.</span> <span class="nav-text">string</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hash"><span class="nav-number">2.3.</span> <span class="nav-text">hash</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#list"><span class="nav-number">2.4.</span> <span class="nav-text">list</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#set"><span class="nav-number">2.5.</span> <span class="nav-text">set</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zset"><span class="nav-number">2.6.</span> <span class="nav-text">zset</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#geo"><span class="nav-number">2.7.</span> <span class="nav-text">geo</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis数据库"><span class="nav-number">3.</span> <span class="nav-text">Redis数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis数据库-1"><span class="nav-number">3.1.</span> <span class="nav-text">Redis数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据库操作指令"><span class="nav-number">3.1.1.</span> <span class="nav-text">数据库操作指令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#键的生命周期"><span class="nav-number">3.2.</span> <span class="nav-text">键的生命周期</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#过期键清除策略"><span class="nav-number">3.2.1.</span> <span class="nav-text">过期键清除策略</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#持久化"><span class="nav-number">4.</span> <span class="nav-text">持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB持久化"><span class="nav-number">4.1.</span> <span class="nav-text">RDB持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#存储位置"><span class="nav-number">4.1.1.</span> <span class="nav-text">存储位置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#持久化机制"><span class="nav-number">4.1.2.</span> <span class="nav-text">持久化机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#恢复机制"><span class="nav-number">4.1.3.</span> <span class="nav-text">恢复机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#优缺点"><span class="nav-number">4.1.4.</span> <span class="nav-text">优缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF持久化"><span class="nav-number">4.2.</span> <span class="nav-text">AOF持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#持久化机制-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">持久化机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#恢复机制-1"><span class="nav-number">4.2.2.</span> <span class="nav-text">恢复机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#优缺点-1"><span class="nav-number">4.2.3.</span> <span class="nav-text">优缺点</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andy</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

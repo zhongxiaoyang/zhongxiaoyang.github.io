@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="NodeJs,RabbitMq," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="发现写博客有一个好处，它能催促你去了解更多，做更多的总结。前一篇文章介绍了 MQ，不过关于 MQ 的技术细节都没有提到。对于我自己来说，接触一个新技术的时候，一般是先写个 demo 玩起来先，然后再去深入接触和了解这个技术。本文会用到 Node.js 的 Amqplib 库，Node.js 会使用它来操作 RabbitMq，这也是RabbitMq官方推荐我们使用的库 准备工作安装RabbitMq在">
+<meta name="keywords" content="NodeJs,RabbitMq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMq系列二之Amqplib库(上)">
+<meta property="og:url" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/index.html">
+<meta property="og:site_name" content="Andy的个人博客">
+<meta property="og:description" content="发现写博客有一个好处，它能催促你去了解更多，做更多的总结。前一篇文章介绍了 MQ，不过关于 MQ 的技术细节都没有提到。对于我自己来说，接触一个新技术的时候，一般是先写个 demo 玩起来先，然后再去深入接触和了解这个技术。本文会用到 Node.js 的 Amqplib 库，Node.js 会使用它来操作 RabbitMq，这也是RabbitMq官方推荐我们使用的库 准备工作安装RabbitMq在">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/management_login_page.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/management_home_page.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/sequence_diagram.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/management_home_page_connections.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/management_connections_page.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/connection_channel.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/management_exchange_page_bindings.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/fanout_bindings.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/fanout_queues.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/topic_bindings.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/topic_queues.jpeg">
+<meta property="og:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/management_exchange_page.jpeg">
+<meta property="og:updated_time" content="2020-04-17T06:01:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RabbitMq系列二之Amqplib库(上)">
+<meta name="twitter:description" content="发现写博客有一个好处，它能催促你去了解更多，做更多的总结。前一篇文章介绍了 MQ，不过关于 MQ 的技术细节都没有提到。对于我自己来说，接触一个新技术的时候，一般是先写个 demo 玩起来先，然后再去深入接触和了解这个技术。本文会用到 Node.js 的 Amqplib 库，Node.js 会使用它来操作 RabbitMq，这也是RabbitMq官方推荐我们使用的库 准备工作安装RabbitMq在">
+<meta name="twitter:image" content="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/management_login_page.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/"/>
+
+
+
+
+
+  <title>RabbitMq系列二之Amqplib库(上) | Andy的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andy的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/15/JavaScript/RabbitMq系列02/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andy的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">RabbitMq系列二之Amqplib库(上)</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-15T11:04:57+08:00">
+                2018-09-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index">
+                    <span itemprop="name">JavaScript</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/NodeJs/" itemprop="url" rel="index">
+                    <span itemprop="name">NodeJs</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><em>发现写博客有一个好处，它能催促你去了解更多，做更多的总结。前一篇文章介绍了 MQ，不过关于 MQ 的技术细节都没有提到。对于我自己来说，接触一个新技术的时候，一般是先写个 demo 玩起来先，然后再去深入接触和了解这个技术。本文会用到 Node.js 的 Amqplib 库，Node.js 会使用它来操作 RabbitMq，这也是RabbitMq官方推荐我们使用的库</em></p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><h3 id="安装RabbitMq"><a href="#安装RabbitMq" class="headerlink" title="安装RabbitMq"></a>安装RabbitMq</h3><p>在时序图所示的交互之前，我们先要安装一个RabbitMq服务器，使用docker镜像安装启动容器很简单，下面是启动的docker-compose.yml。</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">version: <span class="string">'3.2'</span></span><br><span class="line">services:</span><br><span class="line">  rabbitmq:</span><br><span class="line">    image: <span class="string">'rabbitmq:3.6.6-management'</span></span><br><span class="line">    environment:</span><br><span class="line">      - RABBITMQ_DEFAULT_USER=andy</span><br><span class="line">      - RABBITMQ_DEFAULT_PASS=andy2go</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">'5672:5672/tcp'</span></span><br><span class="line">      - <span class="string">'15672:15672/tcp'</span></span><br></pre></td></tr></table></figure>
+<p>有几个地方需要注意的：</p>
+<ul>
+<li>环境变量</li>
+</ul>
+<p>环境变量配置了用户名和密码，这个用户名和密码也是以后用于登录和使用RabbitMq的账号密码</p>
+<ul>
+<li>端口配置</li>
+</ul>
+<p>5672端口是生产者和消费者连接RabbitMq使用的端口</p>
+<p>15672端口是网页访问RabbitMq管理后台的端口</p>
+<p><strong>命令行运行 <code>docker-compose up</code> 启动RabbitMq</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">➜  rabbitmq git:(dev) ✗ ls</span><br><span class="line">docker-compose.yml</span><br><span class="line">➜  rabbitmq git:(dev) ✗ docker-compose up</span><br><span class="line">Starting rabbitmq_rabbitmq_1 ... done</span><br><span class="line">Attaching to rabbitmq_rabbitmq_1</span><br><span class="line">rabbitmq_1  |</span><br><span class="line">rabbitmq_1  | ...</span><br><span class="line">rabbitmq_1  |</span><br><span class="line">rabbitmq_1  | =INFO REPORT==== 15-Sep-2018::14:23:57 ===</span><br><span class="line">rabbitmq_1  | Server startup complete; 6 plugins started.</span><br><span class="line">rabbitmq_1  |  * rabbitmq_management</span><br><span class="line">rabbitmq_1  |  * rabbitmq_management_agent</span><br><span class="line">rabbitmq_1  |  * rabbitmq_web_dispatch</span><br><span class="line">rabbitmq_1  |  * webmachine</span><br><span class="line">rabbitmq_1  |  * mochiweb</span><br><span class="line">rabbitmq_1  |  * amqp_client</span><br><span class="line">rabbitmq_1  |</span><br><span class="line">rabbitmq_1  | ...</span><br></pre></td></tr></table></figure>
+<p>当出现 <code>Server startup complete</code> 就说明RabbitMq已经安装成功启动了，我们可以访问：<code>localhost:15672</code> 本地访问RabbitMq 的 managemet</p>
+<p>下面的图示管理后台登录的界面和登录之后的首页：</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/management_login_page.jpeg" alt=""></p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/management_home_page.jpeg" alt=""></p>
+<h3 id="安装-Amqplib"><a href="#安装-Amqplib" class="headerlink" title="安装 Amqplib"></a>安装 Amqplib</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install amqplib --save</span><br></pre></td></tr></table></figure>
+<h2 id="交互过程讲解"><a href="#交互过程讲解" class="headerlink" title="交互过程讲解"></a>交互过程讲解</h2><p>为了形象地讲述Amqplib扮演的角色，我们来做一个不恰当的类比。写过node.js的人多多少少了解MongoDB，也多多少少会用到mongoose。我们知道mongoose是MongoDB的ORM，使用mongoose能够很方便地操作MongoDB。</p>
+<p>如果我们将RabbitMq类比成MongoDB，那Amqplib就是RabbitMq的ORM了。这个类比不是很恰当，RabbitMq不是数据库，它没有数据库和数据库表的概念，那Amqplib也就不是ORM了。举这个不恰当的例子只是加快我们知道Amqplib在这个过程中扮演什么角色而已。</p>
+<p>下面的时序图包含了生产者、RabbitMq和消费者之间的交互过程：</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/sequence_diagram.jpeg" alt=""></p>
+<p>图中，分别有三个角色：生成者，消费者，RabbitMq（为了更加直观，将RabbitMq的交换器和队列展现出来），从上往下分别是交互的时间顺序。</p>
+<p>整体一看，扫一下时间轴，我们发现<strong>消费者在生产者发布消息前就已经在监听消息队列了</strong>，简单地说是先有了消费者，再有生产者。其实先有生产者还是先有消费者，没有对与错之分，我的习惯是先有消费者，这也是我以后会坚持的。先有了消费者能够避免消费者迟迟未上线消费消息导致消息积压，而RabbitMq的消息是存储在内存中的，多多少少会存在一些隐患。</p>
+<p>另外<strong>生产者和消费者都可以声明队列</strong>，关于谁来声明队列的问题，RabbitMq是建议生产者和消费者都应该尝试着创建队列。但是有时业务本事在架构之初已经充分预估了队列的使用情况，完全可以在业务程序上线之前创建队列，这样业务程序可以免去声明过程，直接可以使用。RabbitMq对于重复声明队列的请求是友好的，每一次客户端请求声明队列的时候，RabbitMq会先判断队列存不存在，如果不存在就创建队列并成功返回，如果存在，则不创建队列，同时也成功返回。</p>
+<p>下面我们将详细讲解时序图中的交互过程：</p>
+<h3 id="连接RabbitMq"><a href="#连接RabbitMq" class="headerlink" title="连接RabbitMq"></a>连接RabbitMq</h3><p>客户端需要先与RabbitMq建立连接才能执行之后的操作，这个很容易理解，网络通信的第一步是建立连接。与RabbitMq建立连接很简单：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> amqplip = <span class="built_in">require</span>(<span class="string">'amqplib'</span>)</span><br><span class="line"><span class="keyword">const</span> bluebird = <span class="built_in">require</span>(<span class="string">'bluebird'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">connection</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> url = <span class="string">'amqp://andy:andy2go@localhost:5672'</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 延迟一秒</span></span><br><span class="line">  <span class="keyword">await</span> bluebird.delay(<span class="number">1000</span>)</span><br><span class="line">    </span><br><span class="line">  connection.close()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">connection().then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;&#125;)</span><br></pre></td></tr></table></figure>
+<p>连接RabbitMq的url格式为：amqp://用户名:密码@host:5672，这里首先连接RabbitMq并在一秒后关闭连接。连接上RabbitMq之后，从RabbitMq的管理后台的<strong>概述(overview)菜单 -&gt; 汇总(totals) -&gt; 全局统计(global counts) -&gt; 连接数(connections)</strong> 可以看到：</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/management_home_page_connections.jpeg" alt="连接数统计"></p>
+<p>另外点击<strong>连接菜单(connections)</strong>进去也能够看到连接详情，包括连接的状态，信道数量等等：</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/management_connections_page.jpeg" alt="连接列表"></p>
+<p><strong>通过<code>amqplib.connect</code>，客户端与RabbitMq建立了一个TCP连接，一旦成功建立了TCP连接，客户端就可以轻松的操作RabbitMq，包括创建信道、收发消息等等一切操作。</strong></p>
+<p>RabbitMq不建议生产者每次发送消息的时候都建立一个TCP连接，而是公用一个或者几个TCP连接。我建议我们在项目启动之初就创建这个TCP连接，之后的操作都是基于这个TCP连接。因为RabbitMq的连接数是有限制的，当超过这个限制，就会报错:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> amqplip = <span class="built_in">require</span>(<span class="string">'amqplib'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">connection</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> url = <span class="string">'amqp://andy:andy2go@localhost:5672'</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">const</span> total = <span class="number">2000</span></span><br><span class="line">  <span class="keyword">let</span> length = <span class="number">1</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">while</span> (length &lt; total) &#123;</span><br><span class="line">      <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line">      <span class="built_in">console</span>.log(length)</span><br><span class="line">      length += <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">connection().then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;&#125;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">976</span></span><br><span class="line"><span class="number">977</span></span><br><span class="line"><span class="number">978</span></span><br><span class="line"><span class="built_in">Error</span>: Socket closed abruptly during opening handshake</span><br><span class="line">    at Socket.endWhileOpening (<span class="regexp">/Users/</span>andy/git/my_project/rabbitmq/andy_amqplib/node_modules/_amqplib@<span class="number">0.4</span><span class="number">.2</span>@amqplib/lib/connection.js:<span class="number">258</span>:<span class="number">17</span>)</span><br><span class="line">    at emitNone (events.js:<span class="number">111</span>:<span class="number">20</span>)</span><br><span class="line">    at Socket.emit (events.js:<span class="number">208</span>:<span class="number">7</span>)</span><br><span class="line">    at endReadableNT (_stream_readable.js:<span class="number">1064</span>:<span class="number">12</span>)</span><br><span class="line">    at _combinedTickCallback (internal/process/next_tick.js:<span class="number">138</span>:<span class="number">11</span>)</span><br><span class="line">    at process._tickCallback (internal/process/next_tick.js:<span class="number">180</span>:<span class="number">9</span>)</span><br></pre></td></tr></table></figure>
+<p>所以我们应该建立公用的connection，毕竟我们都不想辛苦写出来的程序因为连接数超限制而报错。</p>
+<h3 id="创建信道"><a href="#创建信道" class="headerlink" title="创建信道"></a>创建信道</h3><p>RabbitMq的所有操作都是基于信道完成的，这是因为TCP连接的资源有限，信道不限制。当我们与RabbitMq建立连接之后，我们可以基于TCP连接创建信道，表示我们打开了一条与RabbitMq通信的私密通道，基于这条路径我们就可以使用操作RabbitMq了。下面是TCP与信道的关系图：</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/connection_channel.jpeg" alt=""></p>
+<p>我们可以把TCP连接当成一条电缆，信道就相当于电缆中的光纤束。一般来说我们一个应用程序创建一条TCP连接，在这条连接上创建多条信道。</p>
+<h3 id="声明队列"><a href="#声明队列" class="headerlink" title="声明队列"></a>声明队列</h3><p>队列是AMQP中高level层面的模块，客户端需要确保在使用它之前创建队列。生产者和消费者都可以尝试声明队列，RabbitMq对于队列的重复声明采取的做法是什么都不做并成功返回，但是这个限于声明的时候options参数要一致，如果不一致将会报错。</p>
+<p>下面的代码，客户端首先会先创建一条非持久化的队列，然后尝试再次声明该队列，改为持久化队列。RabbitMq对于参数不一致的重复声明操作会报错</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> queue = <span class="string">'test_queue'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue, &#123;<span class="attr">durable</span>: <span class="literal">true</span>&#125;)</span><br></pre></td></tr></table></figure>
+<p>报错信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">events.js:183</span><br><span class="line">      throw er; // Unhandled 'error' event</span><br><span class="line">      ^</span><br><span class="line">Error: Channel closed by server: 406 (PRECONDITION-FAILED) with message "PRECONDITION_FAILED - inequivalent arg 'durable' for queue 'andy.test' in vhost '/': received 'false' but current is 'true'"</span><br><span class="line">    at Channel.C.accept (/Users/andy/git/my_project/rabbitmq/andy_amqplib/node_modules/_amqplib@0.4.2@amqplib/lib/channel.js:406:17)</span><br><span class="line">    at Connection.mainAccept [as accept] (/Users/andy/git/my_project/rabbitmq/andy_amqplib/node_modules/_amqplib@0.4.2@amqplib/lib/connection.js:63:33)</span><br><span class="line">    at Socket.go (/Users/andy/git/my_project/rabbitmq/andy_amqplib/node_modules/_amqplib@0.4.2@amqplib/lib/connection.js:476:48)</span><br><span class="line">    at emitNone (events.js:106:13)</span><br><span class="line">    at Socket.emit (events.js:208:7)</span><br><span class="line">    at emitReadable_ (_stream_readable.js:513:10)</span><br><span class="line">    at emitReadable (_stream_readable.js:507:7)</span><br><span class="line">    at addChunk (_stream_readable.js:274:7)</span><br><span class="line">    at readableAddChunk (_stream_readable.js:250:11)</span><br><span class="line">    at Socket.Readable.push (_stream_readable.js:208:10)</span><br><span class="line">    at TCP.onread (net.js:607:20)</span><br></pre></td></tr></table></figure>
+<h4 id="options-参数"><a href="#options-参数" class="headerlink" title="options 参数"></a>options 参数</h4><p>声明队列的时候可以提供一些指定的参数来声明指定类型的队列，这些参数统一放在queueDeclare方法的options参数中，主要有以下参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">exclusive: 排它队列，如果为true，则将队列作用于连接，也就是队列仅对首次声明它的连接可见，并在连接断开之后自动删除。因为是基于连接的，同一个TCP连接创建的多条信道是可以访问的。如果一个连接创建了一个排它队列，其他连接不能创建同名的其他排它队列，即使是持久化的，一旦连接断开或者关闭，该排它队列都会被自动删除。通常这种队列适用于一个客户端同时发送和读取消息的应用场景(默认为false)</span><br><span class="line"></span><br><span class="line">durable: 持久化，如果为true，Broker重启之后不消失; 持久化队列会存盘，不同于其他，默认为true。受exclusive和autoDelete参数的影响</span><br><span class="line"></span><br><span class="line">autoDelete: 如果为true，没有消费者在监听消费这个队列时(如果一直都没有消费者在监听，是不会删除的)，队列将被删除（默认为false）</span><br><span class="line"></span><br><span class="line">messageTtl(0 &lt;= n &lt; 2^32): 消息有效期，单位毫秒</span><br><span class="line"></span><br><span class="line">expires(0 &lt;= n &lt; 2^32): 队列有效期，单位毫秒。如果有消费者在消费；队列在过期消失前再次声明了；使用 get 函数主动消费消息等情况，是不会队列是不会消失的。</span><br><span class="line"></span><br><span class="line">deadLetterExchange(字符串): 从队列中丢弃的消息将被重新发送。使用deadLetterRoutingKey 设置为丢弃的消息路由键; 否则，消息的路由密钥（以及CC和BCC，如果存在）将被保留。消息在到期时被丢弃，或被拒绝或封锁，或达到队列限制。</span><br><span class="line"></span><br><span class="line">maxLength(正整数): 设置队列将保存的最大消息数量。旧消息将被丢弃（如果已设置，则为死信）以供新消息使用。</span><br><span class="line"></span><br><span class="line">maxPriority(正整数): 使队列成为优先队列。</span><br></pre></td></tr></table></figure>
+<h3 id="声明交换器"><a href="#声明交换器" class="headerlink" title="声明交换器"></a>声明交换器</h3><p>交换器跟队列一样，是高level层面的模块。网上搜RabbitMq的交换器，基本都会涉及到<code>消息是如何到达队列的？</code>的问题，这是因为交换器的作用就是路由生产者发送的消息到指定的队列。</p>
+<p>交换器的声明和队列的声明类似，客户端在使用它之前确保已经成功创建了它，重复声明当参数不一致的时候会报错。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [exchangeName, type] = [<span class="string">'test_direct'</span>, <span class="string">'direct'</span>]</span><br><span class="line"><span class="keyword">const</span> options = &#123;<span class="attr">durable</span>: <span class="literal">true</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.assertExchange(exchangeName, type, options)</span><br></pre></td></tr></table></figure>
+<p>关于路由键和绑定键，下面的 <strong>队列绑定交换器</strong> 小节会讲到。</p>
+<p>简单来说，当交换器和队列声明完毕之后，我们需要将队列绑定打交换器，这样当生产者将消息发送给交换器的时候交换器可以知道要把消息给哪条队列了。</p>
+<p>大致流程是：</p>
+<ul>
+<li>队列和交换器绑定，并在绑定的时候提供一个<strong>字符串</strong>的绑定键 bindKey</li>
+<li>生成者发送消息的时候提供一个字符串的路由键 routingKey</li>
+<li>交换器根据交换器的类型以及 bindKey 和 routingKey 的匹配关系来决定将消息路由给哪条队列</li>
+<li>一旦交换器匹配不到队列，消息就会进入黑洞。也就是消息投送给一个不存在的队列，客户端任然是可以收到消息投递成功的返回结果，只是这条消息不进入任何一条队列，它最终会消失。这就相当于往天上打了一枪，子弹是飞出去了，但是最终不知道它去了哪里。</li>
+</ul>
+<p>为了能满足各种消息投递需求，RabbitMq提供了四种交换器：direct，fanout，topic和headers</p>
+<h4 id="direct-完全匹配交换器-where-routingKey-bindKey"><a href="#direct-完全匹配交换器-where-routingKey-bindKey" class="headerlink" title="direct - 完全匹配交换器 (where routingKey = bindKey)"></a>direct - 完全匹配交换器 (where routingKey = bindKey)</h4><p>当 routingKey 跟 bindKey 严格相等的时候，消息入到该队列</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [queue1, queue2, exchange] = [<span class="string">'test_queue1'</span>, <span class="string">'test_queue2'</span>, <span class="string">'test_direct'</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"><span class="keyword">const</span> channel = <span class="keyword">await</span> connnection.createChannel()</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue1, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue2, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.assertExchange(exchange, <span class="string">'direct'</span>, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.bindQueue(queue1, exchange, <span class="string">'key1'</span>) <span class="comment">// bingKey = 'key1'</span></span><br><span class="line"><span class="keyword">await</span> channel.bindQueue(queue2, exchange, <span class="string">'key2'</span>) <span class="comment">// bingKey = 'key2'</span></span><br></pre></td></tr></table></figure>
+<p>这段代码执行过后我们从管理后台看到声明和绑定结果</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/management_exchange_page_bindings.jpeg" alt=""></p>
+<p>这个时候我们就可以发送消息到交换器，并且路由给指定的队列了</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [routingKey1, routingKey2, routingKey3] = [<span class="string">'key1'</span>, <span class="string">'key2'</span>, <span class="string">'key3'</span>]</span><br><span class="line">channel.publish(exchange, routingKey1, Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy1'</span>&#125;)))</span><br><span class="line">channel.publish(exchange, routingKey2, Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy2'</span>&#125;)))</span><br><span class="line">channel.publish(exchange, routingKey3, Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy3'</span>&#125;)))</span><br></pre></td></tr></table></figure>
+<p>第一条消息到达<code>test_direct</code>交换器，根据提供的routingKey和bindKey匹配成功，消息最终到达<code>test_queue1</code>队列</p>
+<p>同理第二条消息最终到达<code>test_queue2</code>队列</p>
+<p>第三条消息到达交换器之后，路由键跟绑定键匹配不成功，消息进入黑洞</p>
+<h4 id="fanout-路由给全部绑定到该交换器的队列-no-where"><a href="#fanout-路由给全部绑定到该交换器的队列-no-where" class="headerlink" title="fanout - 路由给全部绑定到该交换器的队列 (no where)"></a>fanout - 路由给全部绑定到该交换器的队列 (no where)</h4><p>fanout决定一个消息路由给哪些队列的条件就是队列有没有绑定到该交换器。所以不会使用routingKey和bindKey做匹配。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [queue1, queue2, exchange] = [</span><br><span class="line">    <span class="string">'test_queue1'</span>,</span><br><span class="line">    <span class="string">'test_queue2'</span>,</span><br><span class="line">    <span class="string">'test_fanout'</span></span><br><span class="line">  ]</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> channel = <span class="keyword">await</span> connnection.createChannel()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> channel.assertQueue(queue1, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line">  <span class="keyword">await</span> channel.assertQueue(queue2, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> channel.assertExchange(exchange, <span class="string">'fanout'</span>, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> channel.bindQueue(queue1, exchange, <span class="string">'key1'</span>)</span><br><span class="line">  <span class="keyword">await</span> channel.bindQueue(queue2, exchange, <span class="string">'key2'</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> [routingKey1, routingKey2, routingKey3] = [<span class="string">'key1'</span>, <span class="string">'key2'</span>, <span class="string">'key3'</span>]</span><br><span class="line">  channel.publish(exchange, routingKey1, Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy'</span>&#125;)))</span><br><span class="line">  channel.publish(exchange, routingKey2, Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy'</span>&#125;)))</span><br><span class="line">  channel.publish(exchange, routingKey3, Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy'</span>&#125;)))</span><br></pre></td></tr></table></figure>
+<p>我们可以看到队列绑定关系</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/fanout_bindings.jpeg" alt=""></p>
+<p>根据这种交换器的路由规则，每条消息发送给所有绑定到该交换器的全部队列，所以第1、2、3条消息都发送给了<code>test_queue1</code>队列和<code>test_queue2</code>队列</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/fanout_queues.jpeg" alt=""></p>
+<h4 id="topic-模糊匹配-where-routingKey-like-bindKey"><a href="#topic-模糊匹配-where-routingKey-like-bindKey" class="headerlink" title="topic - 模糊匹配 (where routingKey like bindKey)"></a>topic - 模糊匹配 (where routingKey like bindKey)</h4><p>在这个过程中，队列绑定到交换器提供一个模糊匹配的字符串绑定键，当消息的路由键符合绑定键的匹配规则的时候，消息被路由到该队列。</p>
+<p>绑定键有三个字符：<code>.</code>、<code>*</code>、<code>#</code>是有特殊含义的</p>
+<ul>
+<li><code>.</code>字符将绑定键分成了多个部分，如绑定键为 <code>log.error</code> 时有两个部分</li>
+<li><p><code>*</code>字符匹配某个部分的内容，如 <code>log.*</code> 将匹配 <code>log.任意字符</code>，但是不匹配 <code>log.任意字符.aaa</code></p>
+</li>
+<li><p><code>#</code>字符匹配多个部分的内容，如<code>log.#</code>可以匹配<code>log</code>、<code>log.任意字符</code>、<code>log.任意字符.任意字符...</code></p>
+</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [queue1, queue2, queue3, queue4, queue5, queue6, queue7, exchange] = [</span><br><span class="line">  <span class="string">'test_queue1'</span>,</span><br><span class="line">  <span class="string">'test_queue2'</span>,</span><br><span class="line">  <span class="string">'test_queue3'</span>,</span><br><span class="line">  <span class="string">'test_queue4'</span>,</span><br><span class="line">  <span class="string">'test_queue5'</span>,</span><br><span class="line">  <span class="string">'test_queue6'</span>,</span><br><span class="line">  <span class="string">'test_queue7'</span>,</span><br><span class="line">  <span class="string">'test_topic'</span></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"><span class="keyword">const</span> channel = <span class="keyword">await</span> connnection.createChannel()</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue1, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue2, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue3, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue4, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue5, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue6, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue7, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.assertExchange(exchange, <span class="string">'topic'</span>, &#123;<span class="attr">durable</span>: <span class="literal">false</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> bindKeys = [<span class="string">'log.*'</span>, <span class="string">'alert.*'</span>, <span class="string">'*.error'</span>, <span class="string">'log.#'</span>, <span class="string">'alert.#'</span>, <span class="string">'#.error'</span>, <span class="string">'#'</span>]</span><br><span class="line"><span class="keyword">await</span> channel.bindQueue(queue1, exchange, bindKeys[<span class="number">0</span>])</span><br><span class="line"><span class="keyword">await</span> channel.bindQueue(queue2, exchange, bindKeys[<span class="number">1</span>])</span><br><span class="line"><span class="keyword">await</span> channel.bindQueue(queue3, exchange, bindKeys[<span class="number">2</span>])</span><br><span class="line"><span class="keyword">await</span> channel.bindQueue(queue4, exchange, bindKeys[<span class="number">3</span>])</span><br><span class="line"><span class="keyword">await</span> channel.bindQueue(queue5, exchange, bindKeys[<span class="number">4</span>])</span><br><span class="line"><span class="keyword">await</span> channel.bindQueue(queue6, exchange, bindKeys[<span class="number">5</span>])</span><br><span class="line"><span class="keyword">await</span> channel.bindQueue(queue7, exchange, bindKeys[<span class="number">6</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> msg = Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy'</span>&#125;))</span><br><span class="line">channel.publish(exchange, <span class="string">'log.error'</span>, msg) <span class="comment">// 1</span></span><br><span class="line">channel.publish(exchange, <span class="string">'log.info'</span>, msg) <span class="comment">// 2</span></span><br><span class="line">channel.publish(exchange, <span class="string">'log.warn'</span>, msg) <span class="comment">// 3</span></span><br><span class="line">channel.publish(exchange, <span class="string">'alert.error'</span>, msg) <span class="comment">// 4</span></span><br><span class="line">channel.publish(exchange, <span class="string">'alert.info'</span>, msg) <span class="comment">// 5</span></span><br><span class="line">channel.publish(exchange, <span class="string">'alert.warn'</span>, msg) <span class="comment">// 6</span></span><br><span class="line">channel.publish(exchange, <span class="string">'log.123'</span>, msg) <span class="comment">// 7</span></span><br><span class="line">channel.publish(exchange, <span class="string">'log.1'</span>, msg) <span class="comment">// 8</span></span><br><span class="line">channel.publish(exchange, <span class="string">'log.'</span>, msg) <span class="comment">// 9</span></span><br><span class="line">channel.publish(exchange, <span class="string">'log'</span>, msg) <span class="comment">// 10</span></span><br><span class="line">channel.publish(exchange, <span class="string">'log.1.2'</span>, msg) <span class="comment">// 11</span></span><br></pre></td></tr></table></figure>
+<p>我们可以从图中看出队列绑定和各个队列收到的消息情况</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/topic_bindings.jpeg" alt=""></p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/topic_queues.jpeg" alt=""></p>
+<p>各个队列收到消息情况是</p>
+<ul>
+<li>queue1的绑定键为<code>log.*</code>，所以他能匹配到一个包含两个部分，且第一个部分为<code>log</code>的路由键。它接收了代码中第 [1, 2, 3, 7, 8, 9] 条消息</li>
+<li>queue2接收了第 [4, 5, 6] 条消息</li>
+<li>queue3接收了第 [1, 4] 条消息</li>
+<li>queue4的绑定键为<code>log.#</code>，所以它能匹配到第一部分为<code>log</code>的不限部分数的路由键。它接收了第 [1, 2, 3, 7, 8, 9, 10, 11] 条消息</li>
+<li>queue5接收了第 [4, 5, 6] 条消息</li>
+<li>queue6接收了第 [1, 4] 条消息</li>
+<li>queue7接收了每一条消息</li>
+</ul>
+<h4 id="headers-现在很少用到"><a href="#headers-现在很少用到" class="headerlink" title="headers - 现在很少用到"></a>headers - 现在很少用到</h4><h3 id="队列绑定交换器"><a href="#队列绑定交换器" class="headerlink" title="队列绑定交换器"></a>队列绑定交换器</h3><p>绑定交换器的部分在前一部分已经讲了很多，关于绑定的概念也有了些许了解。但是当我们刚安装启动RabbitMq的时候，我们从management界面上的exchanges导航下可以看到，其实<strong>RabbitMq已经默认为我们提供了一些交换器</strong>，平时我们不一定每次都需要自己声明新的交换器，拿已经存在的交换器就好了。</p>
+<p><img src="/2018/09/15/JavaScript/RabbitMq系列02/management_exchange_page.jpeg" alt=""></p>
+<p>首先我们可以看到，这些交换器都是持久化的(在features里面有个青色的<code>D</code>)，这里包含了2个direct类型、2个headers类型、1个fanout类型以及3个topic类型的交换器</p>
+<p><strong>第一个direct类型的交换器是RabbitMq默认的交换器，其他的交换器也只是RabbitMq提供好方便我们使用而已</strong></p>
+<p>默认交换器点进去不会列出已经绑定的队列列表，它是所以队列默认会绑定的交换器。也就是每个队列声明成功之后都会绑定到这个交换器，<strong>绑定键就是队列名称</strong>，客户端不能显示使用这个默认交换器绑定或者解绑队列，这个交换器也不能删除。</p>
+<p>默认交换器如何使用：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [url, queue] = [</span><br><span class="line">  <span class="string">'...'</span>,</span><br><span class="line">  <span class="string">'test_queue'</span></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"><span class="keyword">const</span> channel = <span class="keyword">await</span> connnection.createChannel()</span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue, &#123;<span class="attr">durable</span>: <span class="literal">true</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> r = <span class="keyword">await</span> channel.sendToQueue(queue, Buffer.from(<span class="built_in">JSON</span>.stringify(msg)))</span><br><span class="line"><span class="built_in">console</span>.log(r) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+<p>当我们使用sendToQueue发送消息给某个队列的时候，默认交换器就用上了。消息到达默认交换器，默认交换器根据队列名字将消息路由到指定队列</p>
+<p><strong>所以我们可以发现，所有的消息都是经过了交换器，最终才到达队列的</strong></p>
+<p>下篇继续</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NodeJs/" rel="tag"># NodeJs</a>
+          
+            <a href="/tags/RabbitMq/" rel="tag"># RabbitMq</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/26/JavaScript/RabbitMq系列01/" rel="next" title="RabbitMq系列一之了解消息队列">
+                <i class="fa fa-chevron-left"></i> RabbitMq系列一之了解消息队列
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/22/JavaScript/RabbitMq系列03/" rel="prev" title="RabbitMq系列三之Amqplib库(中)">
+                RabbitMq系列三之Amqplib库(中) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Andy" />
+            
+              <p class="site-author-name" itemprop="name">Andy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备工作"><span class="nav-number">1.</span> <span class="nav-text">准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装RabbitMq"><span class="nav-number">1.1.</span> <span class="nav-text">安装RabbitMq</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-Amqplib"><span class="nav-number">1.2.</span> <span class="nav-text">安装 Amqplib</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#交互过程讲解"><span class="nav-number">2.</span> <span class="nav-text">交互过程讲解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#连接RabbitMq"><span class="nav-number">2.1.</span> <span class="nav-text">连接RabbitMq</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建信道"><span class="nav-number">2.2.</span> <span class="nav-text">创建信道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#声明队列"><span class="nav-number">2.3.</span> <span class="nav-text">声明队列</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#options-参数"><span class="nav-number">2.3.1.</span> <span class="nav-text">options 参数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#声明交换器"><span class="nav-number">2.4.</span> <span class="nav-text">声明交换器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#direct-完全匹配交换器-where-routingKey-bindKey"><span class="nav-number">2.4.1.</span> <span class="nav-text">direct - 完全匹配交换器 (where routingKey = bindKey)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fanout-路由给全部绑定到该交换器的队列-no-where"><span class="nav-number">2.4.2.</span> <span class="nav-text">fanout - 路由给全部绑定到该交换器的队列 (no where)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#topic-模糊匹配-where-routingKey-like-bindKey"><span class="nav-number">2.4.3.</span> <span class="nav-text">topic - 模糊匹配 (where routingKey like bindKey)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#headers-现在很少用到"><span class="nav-number">2.4.4.</span> <span class="nav-text">headers - 现在很少用到</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#队列绑定交换器"><span class="nav-number">2.5.</span> <span class="nav-text">队列绑定交换器</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andy</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

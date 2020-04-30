@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="NodeJs,RabbitMq," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="说明amqplib库提供了很多实用的方法，我们可以很方便的操作RabbitMq。前面的内容，我们从连接RabbitMq，到发送和消费消息都有讲到。基于这些已有的知识，我们基本可以在业务中用上了。这里对amqplib提供的一些其他方法做个讲解，有些方法我们不一定需要用到，但是我们可以了解一下 连接管理虽然程序退出、报错，连接一般都会断开连接，但是资源释放一直是我们程序员的尝试，RabbitMq关闭连">
+<meta name="keywords" content="NodeJs,RabbitMq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMq系列四之Amqplib库(下)">
+<meta property="og:url" content="http://yoursite.com/2018/09/23/JavaScript/RabbitMq系列04/index.html">
+<meta property="og:site_name" content="Andy的个人博客">
+<meta property="og:description" content="说明amqplib库提供了很多实用的方法，我们可以很方便的操作RabbitMq。前面的内容，我们从连接RabbitMq，到发送和消费消息都有讲到。基于这些已有的知识，我们基本可以在业务中用上了。这里对amqplib提供的一些其他方法做个讲解，有些方法我们不一定需要用到，但是我们可以了解一下 连接管理虽然程序退出、报错，连接一般都会断开连接，但是资源释放一直是我们程序员的尝试，RabbitMq关闭连">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-04-17T06:01:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RabbitMq系列四之Amqplib库(下)">
+<meta name="twitter:description" content="说明amqplib库提供了很多实用的方法，我们可以很方便的操作RabbitMq。前面的内容，我们从连接RabbitMq，到发送和消费消息都有讲到。基于这些已有的知识，我们基本可以在业务中用上了。这里对amqplib提供的一些其他方法做个讲解，有些方法我们不一定需要用到，但是我们可以了解一下 连接管理虽然程序退出、报错，连接一般都会断开连接，但是资源释放一直是我们程序员的尝试，RabbitMq关闭连">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/09/23/JavaScript/RabbitMq系列04/"/>
+
+
+
+
+
+  <title>RabbitMq系列四之Amqplib库(下) | Andy的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andy的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/23/JavaScript/RabbitMq系列04/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andy的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">RabbitMq系列四之Amqplib库(下)</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-23T13:34:20+08:00">
+                2018-09-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index">
+                    <span itemprop="name">JavaScript</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/NodeJs/" itemprop="url" rel="index">
+                    <span itemprop="name">NodeJs</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><p>amqplib库提供了很多实用的方法，我们可以很方便的操作RabbitMq。前面的内容，我们从连接RabbitMq，到发送和消费消息都有讲到。基于这些已有的知识，我们基本可以在业务中用上了。这里对amqplib提供的一些其他方法做个讲解，有些方法我们不一定需要用到，但是我们可以了解一下</p>
+<h2 id="连接管理"><a href="#连接管理" class="headerlink" title="连接管理"></a>连接管理</h2><p>虽然程序退出、报错，连接一般都会断开连接，但是资源释放一直是我们程序员的尝试，RabbitMq关闭连接很简单，基于连接调用close方法就可以了。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 关闭连接</span></span><br><span class="line">connnection.close()</span><br></pre></td></tr></table></figure>
+<h3 id="连接事件"><a href="#连接事件" class="headerlink" title="连接事件"></a>连接事件</h3><p>连接在特殊情况下回触发事件，我们可以监听这些事件即使处理连接的创建，比如当连接断开了，后续的操作就无法正常进行，这个时候我们就可以监听事件解决断后重连了</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> conn = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 连接关闭的情况下触发，可以是调用了close()、可以是服务器关闭连接导致socket关闭</span></span><br><span class="line">conn.on(<span class="string">'close'</span>, () =&gt; &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">如果连接由于#close 被调用之外的原因而关闭或者服务器启动的优雅关闭，则会发送; 这些原因包括：</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">服务器检测到的协议违规（可能是此库中的错误）</span></span><br><span class="line"><span class="comment">服务器错误</span></span><br><span class="line"><span class="comment">网络错误</span></span><br><span class="line"><span class="comment">服务器认为客户端由于心跳错过而死亡</span></span><br><span class="line"><span class="comment">优雅的关闭可以由运营商发起（例如，使用管理工具），或者如果服务器正在关闭; 在这种情况下，不会'error' 发出任何事件。</span></span><br><span class="line"><span class="comment">'close'也将在之后发出'error'</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line">conn.on(<span class="string">'error'</span>, (err) =&gt; &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">当RabbitMQ服务器（版本3.2.0之后）决定阻止连接时发出。通常，如果存在一些资源短缺（例如内存），并且在连接上发布消息，它将执行此操作</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line">conn.on(<span class="string">'blocked'</span>, (reason) =&gt; &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">'blocked'一旦资源短缺减轻，一段时间后才会发布。</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line">conn.on(<span class="string">'unblocked'</span>, () =&gt; &#123;&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="信道通道管理"><a href="#信道通道管理" class="headerlink" title="信道通道管理"></a>信道通道管理</h2><p>信道也是连接资源，关闭也很简单</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"><span class="keyword">const</span> channel = <span class="keyword">await</span> connection.createChannel()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 关闭信道</span></span><br><span class="line">channel.close()</span><br></pre></td></tr></table></figure>
+<h3 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> connnection = <span class="keyword">await</span> amqplib.connect(url)</span><br><span class="line"><span class="keyword">const</span> channel = <span class="keyword">await</span> connection.createChannel()</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">'close'一旦完成关闭握手（可能由发起者#close()），通道就会发出; 或者，如果它的连接关闭。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">当频道关闭时，频道上任何未解决的操作都将被放弃（并且返回的承诺被拒绝）</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line">channel.on(<span class="string">'close'</span>, () =&gt; &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">'error'如果服务器因任何原因关闭了频道，则会发出一个频道。这些原因包括</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">由于前置条件失败而导致操作失败（通常在参数中命名的内容不存在）</span></span><br><span class="line"><span class="comment">一个人用管理工具关闭了频道</span></span><br><span class="line"><span class="comment">'error'如果连接因错误而关闭，则通道不会发出。</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line">channel.on(<span class="string">'error'</span>, () =&gt; &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">如果使用该mandatory标志发布消息（它是Channel#publish此API中的选项 ），则可以将其返回到发送通道（如果无法路由）。每当发生这种情况时，通道将以return消息对象（如中所述#consume）作为参数发出。</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line">channel.on(<span class="string">'return'</span>, () =&gt; &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">就像一个stream.Writable一样，一旦它的写缓冲区被清空（即，一旦它准备再次写入），一个通道将发出'drain'，如果它先前已经false从#publish或 返回#sendToQueue</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line">channel.on(<span class="string">'drain'</span>, () =&gt; &#123;&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="检查队列存不存在"><a href="#检查队列存不存在" class="headerlink" title="检查队列存不存在"></a>检查队列存不存在</h2><p>checkQueue(queue)</p>
+<p>这个方法可以检查某个队列是否存在，不过我平时不会这么优雅地执行这个方法，我直接就去声明队列了。因为RabbitMq对于重复声明队列是友好的。</p>
+<h3 id="存在-返回值与assetQueue函数相同"><a href="#存在-返回值与assetQueue函数相同" class="headerlink" title="存在 - 返回值与assetQueue函数相同"></a>存在 - 返回值与assetQueue函数相同</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> assetRes = <span class="keyword">await</span> channel.assetQueue(<span class="string">'andy_school'</span>)</span><br><span class="line"><span class="comment">// &#123; queue: 'andy_school', messageCount: 0, consumerCount: 0 &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> checkRes = <span class="keyword">await</span> channel.checkQueue(<span class="string">'andy_school'</span>)</span><br><span class="line"><span class="comment">// &#123; queue: 'andy_school', messageCount: 0, consumerCount: 0 &#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="不存在-关闭信道，报错"><a href="#不存在-关闭信道，报错" class="headerlink" title="不存在 - 关闭信道，报错"></a>不存在 - 关闭信道，报错</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> checkRes = <span class="keyword">await</span> channel.checkQueue(<span class="string">'andy_new'</span>)</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Error: Channel closed by server: </span></span><br><span class="line"><span class="comment"> * 404 (NOT-FOUND) with message "NOT_FOUND - no queue 'andy_new' in vhost '/'"</span></span><br><span class="line"><span class="comment"> **/</span></span><br></pre></td></tr></table></figure>
+<h2 id="删除队列"><a href="#删除队列" class="headerlink" title="删除队列"></a>删除队列</h2><p>deleteQueue(queue, options)</p>
+<p>我们可以声明队列，也可以删除某个队列。</p>
+<h4 id="options"><a href="#options" class="headerlink" title="options"></a>options</h4><ul>
+<li><p>ifUnused: 如果为true，当有消费者在消费就删不了 (默认为false)</p>
+</li>
+<li><p>ifEmpty: 如果为true，当还有消息在队列就删除不了 (默认为false)</p>
+</li>
+</ul>
+<p>如果想要无条件删除队列，应该两个参数都为 false 或者不传 options 参数</p>
+<h4 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> queue = <span class="string">'andy_test'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">await</span> channel.assertQueue(queue)</span><br><span class="line"><span class="keyword">const</span> msg = Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy'</span>&#125;))</span><br><span class="line"><span class="keyword">await</span> channel.sendToQueue(queue, msg)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> delExists = <span class="keyword">await</span> channel.deleteQueue(queue)</span><br><span class="line"><span class="keyword">let</span> delNone = <span class="keyword">await</span> channel.deleteQueue(queue)</span><br><span class="line"><span class="built_in">console</span>.log(delExists)</span><br><span class="line"><span class="built_in">console</span>.log(delNone)</span><br><span class="line"><span class="comment">// &#123; messageCount: 1 &#125;</span></span><br><span class="line"><span class="comment">// &#123; messageCount: 0 &#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="删除队列中的所有消息"><a href="#删除队列中的所有消息" class="headerlink" title="删除队列中的所有消息"></a>删除队列中的所有消息</h2><p>purgeQueue(queue)</p>
+<p>删除所有未传送给消费者的消息，如果一个消息已经发送给了消费者即使未被确认 (ack)，也不会被删除</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> queue = <span class="string">'andy_test'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> msg = Buffer.from(<span class="built_in">JSON</span>.stringify(&#123;<span class="attr">name</span>: <span class="string">'Andy'</span>&#125;))</span><br><span class="line"><span class="keyword">await</span> channel.sendToQueue(queue, msg)</span><br><span class="line"><span class="keyword">await</span> channel.sendToQueue(queue, msg)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> res = <span class="keyword">await</span> channel.purgeQueue(queue)</span><br><span class="line"><span class="built_in">console</span>.log(res)</span><br><span class="line"><span class="comment">// &#123; messageCount: 2 &#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="队列与交换器解绑"><a href="#队列与交换器解绑" class="headerlink" title="队列与交换器解绑"></a>队列与交换器解绑</h2><p>unbindQueue(queue, exchange, bindKey)</p>
+<h2 id="检查交换器是否存在"><a href="#检查交换器是否存在" class="headerlink" title="检查交换器是否存在"></a>检查交换器是否存在</h2><p>checkExchange(exchange)</p>
+<p>检查交换器是否存在，如果不存在，关闭信道，并报错</p>
+<h2 id="删除交换器"><a href="#删除交换器" class="headerlink" title="删除交换器"></a>删除交换器</h2><p>deleteExchange(name, options)</p>
+<p>如果交换不存在，则引发channel错误</p>
+<h4 id="options-1"><a href="#options-1" class="headerlink" title="options"></a>options</h4><ul>
+<li>ifUnused  (boolean) 如果为true且交换有绑定，则不会删除它，并且将关闭该通道</li>
+</ul>
+<h2 id="交换器绑定"><a href="#交换器绑定" class="headerlink" title="交换器绑定"></a>交换器绑定</h2><p>bindExchange(destination, source, pattern, args)</p>
+<p>将一个交换器绑定到另外一个交换器</p>
+<h2 id="交换器之间解绑"><a href="#交换器之间解绑" class="headerlink" title="交换器之间解绑"></a>交换器之间解绑</h2><p>unbindExchange(destination, source, pattern, args)</p>
+<h2 id="停止消费消息"><a href="#停止消费消息" class="headerlink" title="停止消费消息"></a>停止消费消息</h2><p>cancel(consumerTag)</p>
+<p>这指示服务器停止向标识的消费者发送消息<code>consumerTag</code>。消息可以在发送和回复之间到达; 但是，一旦回复得到解决，消费者将不再有消息，即不再调用消息回调。</p>
+<p>这<code>consumerTag</code>是回复中给出的字符串<code>#consume</code>，可能是由服务器生成的</p>
+<h2 id="确认信道上的所有消息"><a href="#确认信道上的所有消息" class="headerlink" title="确认信道上的所有消息"></a>确认信道上的所有消息</h2><p>channel.ackAll()</p>
+<p>ack()方法当你传的消息不正确的时候会报错</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">channel.consume(queue, <span class="keyword">async</span> msg =&gt; &#123;</span><br><span class="line">    <span class="keyword">await</span> promise.delay(<span class="number">500</span>)</span><br><span class="line">    <span class="keyword">let</span> content = msg.content.toString()</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'message received: '</span>, content)</span><br><span class="line">    channel.ack(<span class="string">'msg'</span>)</span><br><span class="line">  &#125;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  andy_amqplib node src/fair_dispatch/receive_delay_500.js</span><br><span class="line">message received:  blah</span><br><span class="line">(node:73366) UnhandledPromiseRejectionWarning: TypeError: Cannot read property 'deliveryTag' of undefined</span><br><span class="line">    at Channel.C.ack (/Users/andy/git/my_project/rabbitmq/andy_amqplib/node_modules/_amqplib@0.4.2@amqplib/lib/channel_model.js:230:29)</span><br><span class="line">    at channel.consume (/Users/andy/git/my_project/rabbitmq/andy_amqplib/src/fair_dispatch/receive_delay_500.js:23:13)</span><br><span class="line">    at &lt;anonymous&gt;</span><br><span class="line">(node:73366) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). (rejection id: 1)</span><br><span class="line">(node:73366) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future,promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.</span><br></pre></td></tr></table></figure>
+<p>ackAll() 确认频道上所有未完成的消息。这是一种“安全”操作，即使没有这样的消息也不会导致错误。</p>
+<h2 id="拒绝消息"><a href="#拒绝消息" class="headerlink" title="拒绝消息"></a>拒绝消息</h2><p>nack(message, [allUpTo, requeue])</p>
+<p>拒绝消息，这个通知 RabbitMq 要么将消息重发要么丢弃消息</p>
+<h4 id="allUpTo"><a href="#allUpTo" class="headerlink" title="allUpTo"></a>allUpTo</h4><h4 id="requeue"><a href="#requeue" class="headerlink" title="requeue"></a>requeue</h4><ul>
+<li>默认为true，RabbitMq 会尝试将消息放回队列，重新让消费者消费</li>
+<li>如果为 false，直接丢弃消息</li>
+</ul>
+<h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> channel.consume(queue, <span class="keyword">async</span> msg =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(msg)</span><br><span class="line">    channel.nack(msg)</span><br><span class="line">    <span class="comment">// 等价于</span></span><br><span class="line">    <span class="comment">// channel.nack(msg, false, true)</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 下面是打印的日志 - deliveryTag</span></span><br><span class="line">&#123; <span class="attr">fields</span>:</span><br><span class="line">   &#123; <span class="attr">consumerTag</span>: <span class="string">'amq.ctag-2oRINftA3vn8Ui4w3mpgVw'</span>,</span><br><span class="line">     deliveryTag: <span class="number">1</span>,</span><br><span class="line">     redelivered: <span class="literal">false</span>,</span><br><span class="line">     ... &#125;,</span><br><span class="line">  properties:&#123; ... &#125;,</span><br><span class="line">  content: &lt;Buffer&gt; &#125;</span><br><span class="line">// ...</span><br><span class="line">&#123; fields:</span><br><span class="line">   &#123; consumerTag: 'amq.ctag-2oRINftA3vn8Ui4w3mpgVw',</span><br><span class="line">     deliveryTag: 423,</span><br><span class="line">     redelivered: true,</span><br><span class="line">     ... &#125;,</span><br><span class="line">  properties:&#123; ... &#125;,</span><br><span class="line">  content: &lt;Buffer&gt; &#125;</span><br><span class="line">// ...</span><br></pre></td></tr></table></figure>
+<h2 id="拒绝通道上的所有消息"><a href="#拒绝通道上的所有消息" class="headerlink" title="拒绝通道上的所有消息"></a>拒绝通道上的所有消息</h2><p>nackAll([requeue])</p>
+<p>拒绝此通道上的所有未完成消息</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NodeJs/" rel="tag"># NodeJs</a>
+          
+            <a href="/tags/RabbitMq/" rel="tag"># RabbitMq</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/22/JavaScript/RabbitMq系列03/" rel="next" title="RabbitMq系列三之Amqplib库(中)">
+                <i class="fa fa-chevron-left"></i> RabbitMq系列三之Amqplib库(中)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/30/JavaScript/公众号对接01/" rel="prev" title="公众平台对接系列01 - 授权获取用户信息">
+                公众平台对接系列01 - 授权获取用户信息 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Andy" />
+            
+              <p class="site-author-name" itemprop="name">Andy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#连接管理"><span class="nav-number">2.</span> <span class="nav-text">连接管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#连接事件"><span class="nav-number">2.1.</span> <span class="nav-text">连接事件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#信道通道管理"><span class="nav-number">3.</span> <span class="nav-text">信道通道管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#事件"><span class="nav-number">3.1.</span> <span class="nav-text">事件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检查队列存不存在"><span class="nav-number">4.</span> <span class="nav-text">检查队列存不存在</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#存在-返回值与assetQueue函数相同"><span class="nav-number">4.1.</span> <span class="nav-text">存在 - 返回值与assetQueue函数相同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不存在-关闭信道，报错"><span class="nav-number">4.2.</span> <span class="nav-text">不存在 - 关闭信道，报错</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除队列"><span class="nav-number">5.</span> <span class="nav-text">删除队列</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#options"><span class="nav-number">5.0.1.</span> <span class="nav-text">options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码实例"><span class="nav-number">5.0.2.</span> <span class="nav-text">代码实例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除队列中的所有消息"><span class="nav-number">6.</span> <span class="nav-text">删除队列中的所有消息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#队列与交换器解绑"><span class="nav-number">7.</span> <span class="nav-text">队列与交换器解绑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检查交换器是否存在"><span class="nav-number">8.</span> <span class="nav-text">检查交换器是否存在</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除交换器"><span class="nav-number">9.</span> <span class="nav-text">删除交换器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#options-1"><span class="nav-number">9.0.1.</span> <span class="nav-text">options</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#交换器绑定"><span class="nav-number">10.</span> <span class="nav-text">交换器绑定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#交换器之间解绑"><span class="nav-number">11.</span> <span class="nav-text">交换器之间解绑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#停止消费消息"><span class="nav-number">12.</span> <span class="nav-text">停止消费消息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#确认信道上的所有消息"><span class="nav-number">13.</span> <span class="nav-text">确认信道上的所有消息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拒绝消息"><span class="nav-number">14.</span> <span class="nav-text">拒绝消息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#allUpTo"><span class="nav-number">14.0.1.</span> <span class="nav-text">allUpTo</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#requeue"><span class="nav-number">14.0.2.</span> <span class="nav-text">requeue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码实现"><span class="nav-number">14.0.3.</span> <span class="nav-text">代码实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拒绝通道上的所有消息"><span class="nav-number">15.</span> <span class="nav-text">拒绝通道上的所有消息</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andy</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
